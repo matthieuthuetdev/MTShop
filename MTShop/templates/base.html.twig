@@ -24,8 +24,39 @@
         <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
+        <style>
+            .navbar-mtshop {
+                background: linear-gradient(135deg, #0b1f3a 0%, #12345b 100%);
+            }
+
+            .navbar-mtshop .navbar-brand,
+            .navbar-mtshop .nav-link {
+                color: rgba(255, 255, 255, 0.92);
+            }
+
+            .navbar-mtshop .navbar-brand:hover,
+            .navbar-mtshop .navbar-brand:focus,
+            .navbar-mtshop .nav-link:hover,
+            .navbar-mtshop .nav-link:focus {
+                color: #ffffff;
+            }
+
+            .navbar-mtshop .nav-link.active {
+                color: #ffffff;
+                font-weight: 600;
+            }
+
+            .navbar-mtshop .navbar-toggler {
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+
+            .navbar-mtshop .navbar-toggler-icon {
+                filter: invert(1);
+            }
+        </style>
     </head>
     <body>
+        {% include 'menu/visitor.html.twig' %}
         {% block body %}{% endblock %}
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
