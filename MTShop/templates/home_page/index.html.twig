@@ -1,20 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomePageController!{% endblock %}
+{% block title %}Accueil | MTShop{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/xampp/htdocs/MTShop/MTShop/src/Controller/HomePageController.php</code></li>
-        <li>Your template at <code>C:/xampp/htdocs/MTShop/MTShop/templates/home_page/index.html.twig</code></li>
-    </ul>
-</div>
+<section class="container py-5">
+    <div class="px-4 py-5 py-md-6 bg-light border rounded-4">
+        <h1 class="display-3 fw-bold mb-4">MTShop</h1>
+        <p class="lead mb-0" style="max-width: 760px;">
+            Bienvenue sur notre boutique. Il s'agit d'une fausse boutique en ligne créée pour des tests.
+            Au moment du paiement, toutes les personnes qui effectuent un achat seront remboursées.
+        </p>
+    </div>
+</section>
 {% endblock %}
