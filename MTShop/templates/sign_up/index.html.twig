@@ -13,7 +13,14 @@
                         Créez votre compte afin de pouvoir réaliser des achats sur cette boutique en ligne.
                     </p>
 
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success mb-4" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
                     {{ form_start(registrationForm, { attr: { class: 'auth-form', novalidate: 'novalidate' } }) }}
+                        {{ form_errors(registrationForm) }}
                         <div class="mb-3">
                             {{ form_label(registrationForm.firstName, null, { label_attr: { class: 'auth-label mb-2' } }) }}
                             {{ form_widget(registrationForm.firstName, {
