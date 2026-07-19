@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-7">
+                <div class="rounded-4 bg-white border border-2 p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <h1 class="display-5 fw-bold mb-3">S'inscrire</h1>
+                    <p class="fs-5 text-secondary mb-4">
+                        Créez votre compte afin de pouvoir réaliser des achats sur cette boutique en ligne.
+                    </p>
+
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success mb-4" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {{ form_start(registrationForm, { attr: { class: 'auth-form', novalidate: 'novalidate' } }) }}
+                        {{ form_errors(registrationForm) }}
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.firstName, null, { label_attr: { class: 'auth-label mb-2' } }) }}
+                            {{ form_widget(registrationForm.firstName, {
+                                attr: {
+                                    class: 'form-control form-control-lg auth-control',
+                                    placeholder: 'Entrez votre prénom',
+                                    autocomplete: 'given-name'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.firstName) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.lastName, null, { label_attr: { class: 'auth-label mb-2' } }) }}
+                            {{ form_widget(registrationForm.lastName, {
+                                attr: {
+                                    class: 'form-control form-control-lg auth-control',
+                                    placeholder: 'Entrez votre nom',
+                                    autocomplete: 'family-name'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.lastName) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.email, null, { label_attr: { class: 'auth-label mb-2' } }) }}
+                            {{ form_widget(registrationForm.email, {
+                                attr: {
+                                    class: 'form-control form-control-lg auth-control',
+                                    placeholder: 'Entrez votre adresse e-mail',
+                                    autocomplete: 'email'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.email) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.password, null, { label_attr: { class: 'auth-label mb-2' } }) }}
+                            {{ form_widget(registrationForm.password, {
+                                attr: {
+                                    class: 'form-control form-control-lg auth-control',
+                                    autocomplete: 'new-password',
+                                    'data-password-input': '',
+                                    placeholder: 'Saisissez votre mot de passe'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.password) }}
+                        </div>
+
+                        <div class="password-rules mb-4 bg-white" data-password-rules>
+                            <p class="password-rules-title">Votre mot de passe doit contenir :</p>
+                            <ul class="password-rules-list">
+                                <li data-password-rule="length">Au moins 8 caractères</li>
+                                <li data-password-rule="lower">Une lettre minuscule</li>
+                                <li data-password-rule="upper">Une lettre majuscule</li>
+                                <li data-password-rule="digit">Un chiffre</li>
+                                <li data-password-rule="special">Un caractère spécial</li>
+                            </ul>
+                            <p class="password-rules-success mb-0" data-password-success hidden>Votre mot de passe est conforme !</p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold">Créer mon compte</button>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .auth-form {
+        display: grid;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .auth-label,
+    .password-rules-title {
+        font-weight: 700;
+    }
+
+    .auth-control,
+    .auth-control:focus {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        background: #ffffff;
+        color: #212529;
+        border: 1px solid rgba(11, 31, 58, 0.24);
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(11, 31, 58, 0.03);
+    }
+
+    .auth-control::placeholder {
+        color: rgba(33, 37, 41, 0.5);
+    }
+
+    .auth-control:focus {
+        border-color: rgba(11, 31, 58, 0.55);
+        box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.08);
+    }
+
+    .password-rules {
+        padding: 1rem 1.15rem;
+        border: 2px solid rgba(11, 31, 58, 0.2);
+        border-radius: 1rem;
+        background: #ffffff;
+    }
+
+    .password-rules-list {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .password-rules-list li + li {
+        margin-top: 0.45rem;
+    }
+
+    .password-rules-success {
+        font-weight: 700;
+        color: #0b1f3a;
+    }
+ </style>
+
+<script>
+    const passwordChecks = {
+        length: (value) => value.length >= 8,
+        lower: (value) => /[a-z]/.test(value),
+        upper: (value) => /[A-Z]/.test(value),
+        digit: (value) => /\d/.test(value),
+        special: (value) => /[^A-Za-z\d]/.test(value),
+    };
+
+    function updatePasswordRules() {
+        const passwordInput = document.querySelector('[data-password-input]');
+        const passwordRulesBox = document.querySelector('[data-password-rules]');
+        const passwordSuccess = document.querySelector('[data-password-success]');
+
+        if (!passwordInput || !passwordRulesBox || !passwordSuccess) {
+            return;
+        }
+
+        const value = passwordInput.value;
+        let validRules = 0;
+
+        Object.entries(passwordChecks).forEach(([rule, check]) => {
+            const item = passwordRulesBox.querySelector(`[data-password-rule="${rule}"]`);
+
+            if (!item) {
+                return;
+            }
+
+            const isValid = check(value);
+            item.hidden = isValid;
+
+            if (isValid) {
+                validRules += 1;
+            }
+        });
+
+        passwordSuccess.hidden = validRules !== Object.keys(passwordChecks).length;
+    }
+
+    function initializePasswordRules() {
+        updatePasswordRules();
+    }
+
+    document.addEventListener('input', (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.matches('[data-password-input]')) {
+            updatePasswordRules();
+        }
+    });
+
+    document.addEventListener('turbo:load', initializePasswordRules);
+    document.addEventListener('DOMContentLoaded', initializePasswordRules);
+    initializePasswordRules();
+</script>
+{% endblock %}
