@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-7">
+                <div class="rounded-4 bg-white border border-2 p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <h1 class="display-5 fw-bold mb-4">Profile</h1>
+                    <p class="fs-5 mb-2">Prénom : {{ app.user.firstName }}</p>
+                    <p class="fs-5 mb-2">Nom : {{ app.user.lastName }}</p>
+                    <p class="fs-5 mb-0">Adresse mail : {{ app.user.email }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
