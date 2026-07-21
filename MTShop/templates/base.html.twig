@@ -56,7 +56,11 @@
         </style>
     </head>
     <body>
-        {% include 'menu/visitor.html.twig' %}
+        {% if app.user %}
+            {% include 'menu/authenticated.html.twig' %}
+        {% else %}
+            {% include 'menu/visitor.html.twig' %}
+        {% endif %}
         {% block body %}{% endblock %}
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
