@@ -68,4 +68,54 @@ final class AccountController extends AbstractController
 
         return $this->redirectToRoute('app_my_account_edit');
     }
+
+    #[Route('/my-account/edit/basic-information', name: 'app_my_account_update_basic_information', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function updateBasicInformation(
+        Request $request,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $token = (string) $request->request->get('_token', '');
+
+        if (!$this->isCsrfTokenValid('account_update_basic_information', $token)) {
+            $this->addFlash('danger', 'Your request could not be verified.');
+
+            return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        $user = $this->getUser();
+        if (null === $user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $firstName = trim((string) $request->request->get('firstName', ''));
+        $lastName = trim((string) $request->request->get('lastName', ''));
+        $birthDateRaw = trim((string) $request->request->get('birthDate', ''));
+
+        if ('' === $firstName || '' === $lastName) {
+            $this->addFlash('danger', 'First name and last name are required.');
+
+            return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        if ('' !== $birthDateRaw) {
+            $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $birthDateRaw);
+
+            if (false === $birthDate) {
+                $this->addFlash('danger', 'Please enter a valid birth date.');
+
+                return $this->redirectToRoute('app_my_account_edit');
+            }
+
+            $user->setBirthDate($birthDate);
+        }
+
+        $user->setFirstName($firstName);
+        $user->setLastName($lastName);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Your basic information has been updated.');
+
+        return $this->redirectToRoute('app_my_account_edit');
+    }
 }

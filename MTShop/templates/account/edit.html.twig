@@ -41,6 +41,53 @@
                 </form>
             </fieldset>
         </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Basic information</legend>
+                <form method="post" action="{{ path('app_my_account_update_basic_information') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_basic_information') }}">
+                    <div>
+                        <label for="account-first-name" class="form-label fw-semibold">First name</label>
+                        <input
+                            type="text"
+                            class="form-control form-control-lg"
+                            id="account-first-name"
+                            name="firstName"
+                            value="{{ app.user.firstName }}"
+                            autocomplete="given-name"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="account-last-name" class="form-label fw-semibold">Last name</label>
+                        <input
+                            type="text"
+                            class="form-control form-control-lg"
+                            id="account-last-name"
+                            name="lastName"
+                            value="{{ app.user.lastName }}"
+                            autocomplete="family-name"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="account-birth-date" class="form-label fw-semibold">Birth date</label>
+                        <input
+                            type="date"
+                            class="form-control form-control-lg"
+                            id="account-birth-date"
+                            name="birthDate"
+                            value="{{ app.user.birthDate ? app.user.birthDate|date('Y-m-d') : '' }}"
+                            autocomplete="bday"
+                        >
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Update basic information</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
     </div>
 </section>
 {% endblock %}
