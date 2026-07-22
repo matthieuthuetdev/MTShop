@@ -31,6 +31,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $birthDate = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $twoFactorEnabled = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $twoFactorCodeHash = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $twoFactorCodeExpiresAt = null;
+
     /**
      * @var list<string>
      */
@@ -113,6 +122,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBirthDate(?\DateTimeImmutable $birthDate): static
     {
         $this->birthDate = $birthDate;
+
+        return $this;
+    }
+
+    public function isTwoFactorEnabled(): bool
+    {
+        return $this->twoFactorEnabled;
+    }
+
+    public function setTwoFactorEnabled(bool $twoFactorEnabled): static
+    {
+        $this->twoFactorEnabled = $twoFactorEnabled;
+
+        return $this;
+    }
+
+    public function getTwoFactorCodeHash(): ?string
+    {
+        return $this->twoFactorCodeHash;
+    }
+
+    public function setTwoFactorCodeHash(?string $twoFactorCodeHash): static
+    {
+        $this->twoFactorCodeHash = $twoFactorCodeHash;
+
+        return $this;
+    }
+
+    public function getTwoFactorCodeExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->twoFactorCodeExpiresAt;
+    }
+
+    public function setTwoFactorCodeExpiresAt(?\DateTimeImmutable $twoFactorCodeExpiresAt): static
+    {
+        $this->twoFactorCodeExpiresAt = $twoFactorCodeExpiresAt;
 
         return $this;
     }
