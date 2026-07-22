@@ -64,6 +64,15 @@
                     <p class="fs-5 mb-0 text-secondary">Rien à afficher pour le moment.</p>
                 </div>
             </div>
+
+            <div class="col-12">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <h2 class="h3 fw-bold mb-3">Double authentification</h2>
+                    <p class="fs-5 mb-0 text-secondary">
+                        {{ app.user.twoFactorEnabled ? 'La double authentification est activée.' : 'La double authentification est désactivée.' }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
