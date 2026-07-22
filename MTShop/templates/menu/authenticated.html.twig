@@ -24,7 +24,7 @@
                     <a class="nav-link" href="#">Nos meilleurs vantes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">My account</a>
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">Mon compte</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_logout') }}" data-turbo="false">Se déconnecter</a>
