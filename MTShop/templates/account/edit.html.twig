@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mes informations | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="display-5 fw-bold mb-2">Modifier mes informations</h1>
+            <p class="fs-5 text-secondary mb-0">Modifiez vos informations section par section.</p>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} mb-4" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Adresse mail</legend>
+                <form method="post" action="{{ path('app_my_account_update_email') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_email') }}">
+                    <div>
+                        <label for="account-email" class="form-label fw-semibold">Adresse mail</label>
+                        <input
+                            type="email"
+                            class="form-control form-control-lg"
+                            id="account-email"
+                            name="email"
+                            value="{{ app.user.email }}"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Modifier l'adresse mail</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Informations de base</legend>
+                <form method="post" action="{{ path('app_my_account_update_basic_information') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_basic_information') }}">
+                    <div>
+                        <label for="account-first-name" class="form-label fw-semibold">Prénom</label>
+                        <input
+                            type="text"
+                            class="form-control form-control-lg"
+                            id="account-first-name"
+                            name="firstName"
+                            value="{{ app.user.firstName }}"
+                            autocomplete="given-name"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="account-last-name" class="form-label fw-semibold">Nom</label>
+                        <input
+                            type="text"
+                            class="form-control form-control-lg"
+                            id="account-last-name"
+                            name="lastName"
+                            value="{{ app.user.lastName }}"
+                            autocomplete="family-name"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="account-birth-date" class="form-label fw-semibold">Date de naissance</label>
+                        <input
+                            type="date"
+                            class="form-control form-control-lg"
+                            id="account-birth-date"
+                            name="birthDate"
+                            value="{{ app.user.birthDate ? app.user.birthDate|date('Y-m-d') : '' }}"
+                            autocomplete="bday"
+                        >
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Modifier les informations de base</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Adresse postale</legend>
+                <form method="post" action="{{ path('app_my_account_update_address') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_address') }}">
+                    <div>
+                        <label for="account-shipping-address" class="form-label fw-semibold">Adresse de livraison</label>
+                        <textarea
+                            class="form-control form-control-lg"
+                            id="account-shipping-address"
+                            name="shippingAddress"
+                            rows="4"
+                            autocomplete="shipping street-address"
+                            required
+                        >{{ app.user.shippingAddress }}</textarea>
+                    </div>
+                    <div>
+                        <label for="account-billing-address" class="form-label fw-semibold">Adresse de facturation</label>
+                        <textarea
+                            class="form-control form-control-lg"
+                            id="account-billing-address"
+                            name="billingAddress"
+                            rows="4"
+                            autocomplete="billing street-address"
+                            required
+                        >{{ app.user.billingAddress }}</textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Modifier les adresses postales</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+    </div>
+</section>
+{% endblock %}

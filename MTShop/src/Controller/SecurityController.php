@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class SecurityController extends AbstractController
@@ -29,10 +29,13 @@ final class SecurityController extends AbstractController
         throw new \LogicException('This method is intercepted by the firewall logout.');
     }
 
-    #[Route('/profile', name: 'app_profile')]
-    #[IsGranted('ROLE_USER')]
-    public function profile(): Response
+    #[Route('/clear-session', name: 'app_clear_session', methods: ['POST'])]
+    public function clearSession(Request $request): Response
     {
-        return $this->render('security/profile.html.twig');
+        if ($this->isCsrfTokenValid('clear_session', (string) $request->request->get('_token', ''))) {
+            $request->getSession()->invalidate();
+        }
+
+        return $this->redirectToRoute('app_login');
     }
 }
