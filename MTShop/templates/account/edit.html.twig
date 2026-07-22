@@ -88,6 +88,40 @@
                 </form>
             </fieldset>
         </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Postal address</legend>
+                <form method="post" action="{{ path('app_my_account_update_address') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_address') }}">
+                    <div>
+                        <label for="account-shipping-address" class="form-label fw-semibold">Shipping address</label>
+                        <textarea
+                            class="form-control form-control-lg"
+                            id="account-shipping-address"
+                            name="shippingAddress"
+                            rows="4"
+                            autocomplete="shipping street-address"
+                            required
+                        >{{ app.user.shippingAddress }}</textarea>
+                    </div>
+                    <div>
+                        <label for="account-billing-address" class="form-label fw-semibold">Billing address</label>
+                        <textarea
+                            class="form-control form-control-lg"
+                            id="account-billing-address"
+                            name="billingAddress"
+                            rows="4"
+                            autocomplete="billing street-address"
+                            required
+                        >{{ app.user.billingAddress }}</textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Update postal addresses</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
     </div>
 </section>
 {% endblock %}

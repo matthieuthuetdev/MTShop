@@ -118,4 +118,41 @@ final class AccountController extends AbstractController
 
         return $this->redirectToRoute('app_my_account_edit');
     }
+
+    #[Route('/my-account/edit/address', name: 'app_my_account_update_address', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function updateAddress(
+        Request $request,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $token = (string) $request->request->get('_token', '');
+
+        if (!$this->isCsrfTokenValid('account_update_address', $token)) {
+            $this->addFlash('danger', 'Your request could not be verified.');
+
+            return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        $user = $this->getUser();
+        if (null === $user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $shippingAddress = trim((string) $request->request->get('shippingAddress', ''));
+        $billingAddress = trim((string) $request->request->get('billingAddress', ''));
+
+        if ('' === $shippingAddress || '' === $billingAddress) {
+            $this->addFlash('danger', 'Shipping and billing addresses are required.');
+
+            return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        $user->setShippingAddress($shippingAddress);
+        $user->setBillingAddress($billingAddress);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Your postal addresses have been updated.');
+
+        return $this->redirectToRoute('app_my_account_edit');
+    }
 }
