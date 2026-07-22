@@ -5,7 +5,6 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class SecurityController extends AbstractController
@@ -27,12 +26,5 @@ final class SecurityController extends AbstractController
     public function logout(): never
     {
         throw new \LogicException('This method is intercepted by the firewall logout.');
-    }
-
-    #[Route('/profile', name: 'app_profile')]
-    #[IsGranted('ROLE_USER')]
-    public function profile(): Response
-    {
-        return $this->render('security/profile.html.twig');
     }
 }

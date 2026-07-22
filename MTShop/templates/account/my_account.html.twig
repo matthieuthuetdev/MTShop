@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Account | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">My Account</h1>
+                <p class="fs-5 text-secondary mb-0">All your personal information is grouped here.</p>
+            </div>
+            <div class="d-flex justify-content-md-end">
+                <a href="{{ path('app_my_account_edit') }}" class="btn btn-primary btn-lg fw-semibold">Modify my information</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-6">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <h2 class="h3 fw-bold mb-3">Basic information</h2>
+                    <dl class="mb-0">
+                        <div class="mb-3">
+                            <dt class="text-secondary">First name</dt>
+                            <dd class="mb-0 fs-5">{{ app.user.firstName }}</dd>
+                        </div>
+                        <div class="mb-3">
+                            <dt class="text-secondary">Last name</dt>
+                            <dd class="mb-0 fs-5">{{ app.user.lastName }}</dd>
+                        </div>
+                        <div class="mb-3">
+                            <dt class="text-secondary">Birth date</dt>
+                            <dd class="mb-0 fs-5">
+                                {{ app.user.birthDate ? app.user.birthDate|date('d/m/Y') : 'Not provided yet' }}
+                            </dd>
+                        </div>
+                        <div class="mb-0">
+                            <dt class="text-secondary">Email address</dt>
+                            <dd class="mb-0 fs-5">{{ app.user.email }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <h2 class="h3 fw-bold mb-3">Postal information</h2>
+                    <dl class="mb-0">
+                        <div class="mb-3">
+                            <dt class="text-secondary">Shipping address</dt>
+                            <dd class="mb-0 fs-5">{{ app.user.shippingAddress ?: 'Not provided yet' }}</dd>
+                        </div>
+                        <div class="mb-0">
+                            <dt class="text-secondary">Billing address</dt>
+                            <dd class="mb-0 fs-5">{{ app.user.billingAddress ?: 'Not provided yet' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <h2 class="h3 fw-bold mb-3">Payment methods</h2>
+                    <p class="fs-5 mb-0 text-secondary">Nothing to display for now.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
