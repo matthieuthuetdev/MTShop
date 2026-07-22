@@ -36,7 +36,7 @@ final class AccountController extends AbstractController
         $token = (string) $request->request->get('_token', '');
 
         if (!$this->isCsrfTokenValid('account_update_email', $token)) {
-            $this->addFlash('danger', 'Your request could not be verified.');
+            $this->addFlash('danger', 'Votre demande n’a pas pu être vérifiée.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -49,14 +49,14 @@ final class AccountController extends AbstractController
         $email = mb_strtolower(trim((string) $request->request->get('email', '')));
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->addFlash('danger', 'Please enter a valid email address.');
+            $this->addFlash('danger', 'Veuillez saisir une adresse mail valide.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
 
         $existingUser = $userRepository->findOneBy(['email' => $email]);
         if (null !== $existingUser && $existingUser !== $user) {
-            $this->addFlash('danger', 'This email address is already used.');
+            $this->addFlash('danger', 'Cette adresse mail est déjà utilisée.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -64,7 +64,7 @@ final class AccountController extends AbstractController
         $user->setEmail($email);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Your email address has been updated.');
+        $this->addFlash('success', 'Votre adresse mail a été mise à jour.');
 
         return $this->redirectToRoute('app_my_account_edit');
     }
@@ -78,7 +78,7 @@ final class AccountController extends AbstractController
         $token = (string) $request->request->get('_token', '');
 
         if (!$this->isCsrfTokenValid('account_update_basic_information', $token)) {
-            $this->addFlash('danger', 'Your request could not be verified.');
+            $this->addFlash('danger', 'Votre demande n’a pas pu être vérifiée.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -93,7 +93,7 @@ final class AccountController extends AbstractController
         $birthDateRaw = trim((string) $request->request->get('birthDate', ''));
 
         if ('' === $firstName || '' === $lastName) {
-            $this->addFlash('danger', 'First name and last name are required.');
+            $this->addFlash('danger', 'Le prénom et le nom sont obligatoires.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -102,7 +102,7 @@ final class AccountController extends AbstractController
             $birthDate = \DateTimeImmutable::createFromFormat('Y-m-d', $birthDateRaw);
 
             if (false === $birthDate) {
-                $this->addFlash('danger', 'Please enter a valid birth date.');
+                $this->addFlash('danger', 'Veuillez saisir une date de naissance valide.');
 
                 return $this->redirectToRoute('app_my_account_edit');
             }
@@ -114,7 +114,7 @@ final class AccountController extends AbstractController
         $user->setLastName($lastName);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Your basic information has been updated.');
+        $this->addFlash('success', 'Vos informations de base ont été mises à jour.');
 
         return $this->redirectToRoute('app_my_account_edit');
     }
@@ -128,7 +128,7 @@ final class AccountController extends AbstractController
         $token = (string) $request->request->get('_token', '');
 
         if (!$this->isCsrfTokenValid('account_update_address', $token)) {
-            $this->addFlash('danger', 'Your request could not be verified.');
+            $this->addFlash('danger', 'Votre demande n’a pas pu être vérifiée.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -142,7 +142,7 @@ final class AccountController extends AbstractController
         $billingAddress = trim((string) $request->request->get('billingAddress', ''));
 
         if ('' === $shippingAddress || '' === $billingAddress) {
-            $this->addFlash('danger', 'Shipping and billing addresses are required.');
+            $this->addFlash('danger', 'Les adresses de livraison et de facturation sont obligatoires.');
 
             return $this->redirectToRoute('app_my_account_edit');
         }
@@ -151,7 +151,41 @@ final class AccountController extends AbstractController
         $user->setBillingAddress($billingAddress);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Your postal addresses have been updated.');
+        $this->addFlash('success', 'Vos adresses postales ont été mises à jour.');
+
+        return $this->redirectToRoute('app_my_account_edit');
+    }
+
+    #[Route('/my-account/edit/two-factor', name: 'app_my_account_update_two_factor', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function updateTwoFactor(
+        Request $request,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $token = (string) $request->request->get('_token', '');
+
+        if (!$this->isCsrfTokenValid('account_update_two_factor', $token)) {
+            $this->addFlash('danger', 'Votre demande n’a pas pu être vérifiée.');
+
+            return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        $user = $this->getUser();
+        if (null === $user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $twoFactorEnabled = '1' === (string) $request->request->get('twoFactorEnabled', '0');
+        $user->setTwoFactorEnabled($twoFactorEnabled);
+
+        if (!$twoFactorEnabled) {
+            $user->setTwoFactorCodeHash(null);
+            $user->setTwoFactorCodeExpiresAt(null);
+        }
+
+        $entityManager->flush();
+
+        $this->addFlash('success', $twoFactorEnabled ? 'La double authentification a été activée.' : 'La double authentification a été désactivée.');
 
         return $this->redirectToRoute('app_my_account_edit');
     }
