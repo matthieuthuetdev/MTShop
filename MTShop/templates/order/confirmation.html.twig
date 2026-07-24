@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmation de commande | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="rounded-4 border border-2 bg-white p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
+            <div class="mb-4">
+                <h1 class="display-5 fw-bold mb-3">Votre commande est confirmée</h1>
+                <p class="fs-5 text-secondary mb-0">Votre commande a bien été enregistrée. Voici son récapitulatif complet.</p>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-lg-6">
+                    <div class="rounded-4 border border-2 p-4 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                        <h2 class="h5 fw-bold mb-3">Statut</h2>
+                        <p class="mb-2">Votre commande est confirmée.</p>
+                        <p class="mb-0">Numéro de commande : <strong>#{{ order.id }}</strong></p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="rounded-4 border border-2 p-4 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                        <h2 class="h5 fw-bold mb-3">Livraison</h2>
+                        <p class="mb-2"><strong>{{ deliveryOption.label }}</strong></p>
+                        <p class="mb-2">{{ deliveryOption.note }}</p>
+                        <p class="mb-0">Date de livraison estimée : <strong>{{ deliveryDateText }}</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                    <div class="rounded-4 border border-2 p-4 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                        <h2 class="h5 fw-bold mb-3">Informations client</h2>
+                        <p class="mb-2">Nom : {{ order.customer.firstName }} {{ order.customer.lastName }}</p>
+                        <p class="mb-2">Adresse mail : {{ order.customer.email }}</p>
+                        <p class="mb-2">Adresse de livraison : {{ order.shippingAddress }}</p>
+                        <p class="mb-0">Adresse de facturation : {{ order.billingAddress }}</p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="rounded-4 border border-2 p-4 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                        <h2 class="h5 fw-bold mb-3">Paiement</h2>
+                        <p class="mb-2">Moyen de paiement : {{ order.paymentMethod }}</p>
+                        <p class="mb-0">Montant total : <strong>{{ order.totalAmount|number_format(2, ',', ' ') }} €</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h2 class="h5 fw-bold mb-3">Articles commandés</h2>
+                <div class="d-grid gap-3">
+                    {% for item in order.orderItems %}
+                        <div class="rounded-4 border border-2 p-3" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                            <div class="fw-bold">{{ item.product.name }}</div>
+                            <div class="text-secondary">{{ item.quantity }} × {{ item.unitPrice|number_format(2, ',', ' ') }} €</div>
+                            <div class="text-secondary">Total ligne : {{ item.totalPrice|number_format(2, ',', ' ') }} €</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
