@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: 'products')]
@@ -55,6 +56,10 @@ class Product
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $category = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\Range(min: 0, max: 100)]
+    private int $promotion = 0;
 
     public function __construct()
     {
@@ -231,6 +236,18 @@ class Product
     public function setCategory(?string $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getPromotion(): int
+    {
+        return $this->promotion;
+    }
+
+    public function setPromotion(int $promotion): static
+    {
+        $this->promotion = max(0, min(100, $promotion));
 
         return $this;
     }

@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon panier | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="display-5 fw-bold mb-2">Mon panier</h1>
+            <p class="fs-5 text-secondary mb-0">Retrouvez ici les articles ajoutés à votre panier.</p>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} mb-4" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if items is empty %}
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                <p class="fs-5 mb-0 text-secondary">Votre panier est vide pour le moment.</p>
+            </div>
+
+            <div class="d-grid gap-4 mt-4">
+                <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <div class="rounded-4 bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="height: 220px;">
+                                Image
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-8 col-lg-9">
+                            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                <div>
+                                    <h2 class="h3 fw-bold mb-2">Produit de démonstration 1</h2>
+                                    <p class="text-secondary mb-3">Un premier article factice pour montrer l'affichage du panier avec une image à gauche et du texte à droite.</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <span class="fs-5 fw-semibold">24,90 €</span>
+                                        <span class="text-secondary">Sous-total : 24,90 €</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-lg-end gap-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="btn btn-danger">Retirer</button>
+                                        <span class="fs-5 fw-bold px-3">1</span>
+                                        <button type="button" class="btn btn-primary">Ajouter</button>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger">Supprimer l'article</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <div class="rounded-4 bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="height: 220px;">
+                                Image
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-8 col-lg-9">
+                            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                <div>
+                                    <h2 class="h3 fw-bold mb-2">Produit de démonstration 2</h2>
+                                    <p class="text-secondary mb-3">Un deuxième article pour garder une présentation cohérente dans le panier.</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <span class="fs-5 fw-semibold">39,90 €</span>
+                                        <span class="text-secondary">Sous-total : 39,90 €</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-lg-end gap-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="btn btn-danger">Retirer</button>
+                                        <span class="fs-5 fw-bold px-3">1</span>
+                                        <button type="button" class="btn btn-primary">Ajouter</button>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger">Supprimer l'article</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <div class="rounded-4 bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="height: 220px;">
+                                Image
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-8 col-lg-9">
+                            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                <div>
+                                    <h2 class="h3 fw-bold mb-2">Produit de démonstration 3</h2>
+                                    <p class="text-secondary mb-3">Une troisième carte pour compléter la maquette du panier en HTML et CSS.</p>
+                                    <div class="d-flex flex-wrap align-items-center gap-3">
+                                        <span class="fs-5 fw-semibold">54,90 €</span>
+                                        <span class="text-secondary">Sous-total : 54,90 €</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-lg-end gap-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="btn btn-danger">Retirer</button>
+                                        <span class="fs-5 fw-bold px-3">1</span>
+                                        <button type="button" class="btn btn-primary">Ajouter</button>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger">Supprimer l'article</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+                <div class="row g-4 align-items-end">
+                    <div class="col-12 col-lg-4">
+                        <p class="fs-5 mb-2"><strong>3</strong> article(s) au total</p>
+                        <p class="fs-5 mb-0"><strong>119,70 €</strong></p>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <label for="promo-code" class="form-label fw-semibold">Code promotionnel</label>
+                        <input
+                            type="text"
+                            id="promo-code"
+                            class="form-control form-control-lg"
+                            placeholder="Saisissez votre code promotionnel"
+                        >
+                    </div>
+
+                    <div class="col-12 col-lg-4 text-lg-end">
+                        <button type="button" class="btn btn-primary btn-lg fw-semibold px-4">Passer la commande</button>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="d-grid gap-4">
+                {% for item in items %}
+                    <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-12 col-md-4 col-lg-3">
+                                {% if item.product.imageName %}
+                                    <img
+                                        src="{{ asset('uploads/products/' ~ item.product.imageName) }}"
+                                        alt="{{ item.product.name }}"
+                                        class="img-fluid rounded-4 w-100"
+                                        style="object-fit: cover; height: 220px;"
+                                    >
+                                {% else %}
+                                    <div class="rounded-4 bg-primary d-flex align-items-center justify-content-center text-white fw-bold" style="height: 220px;">
+                                        Image
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 col-md-8 col-lg-9">
+                                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                    <div>
+                                        <h2 class="h3 fw-bold mb-2">{{ item.product.name }}</h2>
+                                        <p class="text-secondary mb-3">{{ item.product.description }}</p>
+
+                                        {% if item.promotion > 0 %}
+                                            <span class="badge text-bg-danger mb-3">Promotion -{{ item.promotion }}%</span>
+                                        {% endif %}
+
+                                        <div class="d-flex flex-wrap align-items-center gap-3">
+                                            <span class="fs-5 fw-semibold">
+                                                {% if item.promotion > 0 %}
+                                                    <del class="text-secondary me-2">{{ item.unitPrice|number_format(2, ',', ' ') }} €</del>
+                                                {% endif %}
+                                                {{ item.discountedUnitPrice|number_format(2, ',', ' ') }} €
+                                            </span>
+                                            <span class="text-secondary">Sous-total : {{ item.lineTotal|number_format(2, ',', ' ') }} €</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-column align-items-lg-end gap-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <form method="post" action="{{ path('app_cart_decrease', {id: item.cart.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cart_decrease_' ~ item.cart.id) }}">
+                                                <button type="submit" class="btn btn-danger">Retirer</button>
+                                            </form>
+
+                                            <span class="fs-5 fw-bold px-3">{{ item.quantity }}</span>
+
+                                            <form method="post" action="{{ path('app_cart_increase', {id: item.cart.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cart_increase_' ~ item.cart.id) }}">
+                                                <button type="submit" class="btn btn-primary">Ajouter</button>
+                                            </form>
+                                        </div>
+
+                                        <form method="post" action="{{ path('app_cart_remove', {id: item.cart.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('cart_remove_' ~ item.cart.id) }}">
+                                            <button type="submit" class="btn btn-outline-danger">Supprimer l'article</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+                <div class="row g-4 align-items-end">
+                    <div class="col-12 col-lg-4">
+                        <p class="fs-5 mb-2"><strong>{{ totalItems }}</strong> article(s) au total</p>
+                        <p class="fs-5 mb-0"><strong>{{ totalAmount|number_format(2, ',', ' ') }} €</strong></p>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <label for="promo-code" class="form-label fw-semibold">Code promotionnel</label>
+                        <input
+                            type="text"
+                            id="promo-code"
+                            class="form-control form-control-lg"
+                            placeholder="Saisissez votre code promotionnel"
+                        >
+                    </div>
+
+                    <div class="col-12 col-lg-4 text-lg-end">
+                        <button type="button" class="btn btn-primary btn-lg fw-semibold px-4">Passer la commande</button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

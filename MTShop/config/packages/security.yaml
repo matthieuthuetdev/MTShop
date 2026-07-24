@@ -18,9 +18,6 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticators:
-                - App\Security\LoginFormAuthenticator
-            entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
                 target: app_home_page
