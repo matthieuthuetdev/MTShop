@@ -122,6 +122,44 @@
                 </form>
             </fieldset>
         </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
+            <fieldset class="mb-0">
+                <legend class="h3 fw-bold mb-4">Double authentification</legend>
+                <form method="post" action="{{ path('app_my_account_update_two_factor') }}" class="d-grid gap-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_update_two_factor') }}">
+                    <div class="form-check">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="twoFactorEnabled"
+                            id="two-factor-enabled"
+                            value="1"
+                            {% if app.user.twoFactorEnabled %}checked{% endif %}
+                        >
+                        <label class="form-check-label fw-semibold" for="two-factor-enabled">
+                            Activer (recommandé)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="twoFactorEnabled"
+                            id="two-factor-disabled"
+                            value="0"
+                            {% if not app.user.twoFactorEnabled %}checked{% endif %}
+                        >
+                        <label class="form-check-label fw-semibold" for="two-factor-disabled">
+                            Désactiver
+                        </label>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">Modifier la double authentification</button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
     </div>
 </section>
 {% endblock %}
