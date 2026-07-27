@@ -83,11 +83,11 @@ final class CheckoutService
             'express' => [
                 'code' => 'express',
                 'label' => 'Express max',
-                'description' => 'Livraison en 1h, 20 €.',
+                'description' => 'Livraison le jour même entre 18h et 20h, 20 €.',
                 'note' => 'Si commande passée avant 15h, livraison entre 18h et 20h le même jour. Offre soumise à condition.',
                 'fee' => 20.0,
                 'available' => $expressAvailable,
-                'estimate' => $expressAvailable ? 'Aujourd’hui entre 18h et 20h' : 'Surlendemain',
+                'estimate' => $expressAvailable ? 'Aujourd’hui entre 18h et 20h' : 'Non disponible',
             ],
             'next_day' => [
                 'code' => 'next_day',
@@ -96,7 +96,7 @@ final class CheckoutService
                 'note' => 'Disponible uniquement si la commande est passée avant 12h.',
                 'fee' => 10.0,
                 'available' => $nextDayAvailable,
-                'estimate' => $nextDayAvailable ? 'Demain' : 'Surlendemain',
+                'estimate' => $nextDayAvailable ? 'Demain' : 'Non disponible',
             ],
             'basic' => [
                 'code' => 'basic',

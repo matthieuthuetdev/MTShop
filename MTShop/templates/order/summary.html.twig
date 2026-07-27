@@ -32,7 +32,7 @@
                     <div class="mb-4">
                         <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
                             <h3 class="h5 fw-bold mb-0">Adresse de livraison</h3>
-                            <a href="{{ path('app_my_account_edit') }}#address" class="btn btn-outline-primary btn-sm">Modifier</a>
+                            <a href="{{ path('app_my_account_edit') }}#address" class="btn btn-primary btn-sm text-white">Modifier</a>
                         </div>
                         <p class="mb-0">{{ shippingAddress ?: 'Non renseignée' }}</p>
                     </div>
@@ -40,7 +40,7 @@
                     <div class="mb-4">
                         <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
                             <h3 class="h5 fw-bold mb-0">Adresse de facturation</h3>
-                            <a href="{{ path('app_my_account_edit') }}#address" class="btn btn-outline-primary btn-sm">Modifier</a>
+                            <a href="{{ path('app_my_account_edit') }}#address" class="btn btn-primary btn-sm text-white">Modifier</a>
                         </div>
                         <p class="mb-0">{{ billingAddress ?: 'Non renseignée' }}</p>
                     </div>
@@ -48,7 +48,7 @@
                     <div class="mb-4">
                         <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
                             <h3 class="h5 fw-bold mb-0">Moyen de paiement</h3>
-                            <span class="btn btn-outline-secondary btn-sm disabled">Modifier</span>
+                            <span class="btn btn-primary btn-sm text-white disabled">Modifier</span>
                         </div>
                         <p class="mb-0">Non disponible</p>
                     </div>
@@ -59,7 +59,7 @@
                         <div class="rounded-4 border border-2 p-4" style="border-color: rgba(11, 31, 58, 0.16) !important;">
                             <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
                                 <h3 class="h5 fw-bold mb-0">Choisissez votre offre de livraison</h3>
-                                <a href="#delivery-options" class="btn btn-outline-primary btn-sm">Modifier</a>
+                                <a href="#delivery-options" class="btn btn-primary btn-sm text-white">Modifier</a>
                             </div>
 
                             <div class="d-grid gap-3" id="delivery-options">
@@ -79,8 +79,6 @@
                                                 <div class="text-secondary">{{ option.description }}</div>
                                                 <div class="text-secondary">{{ option.note }}</div>
                                                 <div class="text-secondary">Livraison estimée : {{ option.estimate }}</div>
-                                                {% if not option.available %}
-                                                {% endif %}
                                             </div>
                                         </div>
                                     </label>
@@ -116,7 +114,7 @@
                                         <div class="text-secondary">{{ item.quantity }} × {{ item.discountedUnitPrice|number_format(2, ',', ' ') }} €</div>
                                         <div class="text-secondary">Total ligne : {{ item.lineTotal|number_format(2, ',', ' ') }} €</div>
                                     </div>
-                                    <a href="{{ path('app_cart_index') }}" class="btn btn-outline-primary btn-sm">Modifier</a>
+                                    <a href="{{ path('app_cart_index') }}" class="btn btn-primary btn-sm text-white">Modifier</a>
                                 </div>
                             {% endfor %}
                         </div>
