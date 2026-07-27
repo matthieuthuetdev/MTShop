@@ -30,6 +30,8 @@ final class OrderController extends AbstractController
         $carts = $cartRepository->findBy(['customer' => $user], ['id' => 'DESC']);
         $summary = $checkoutService->summarizeCart($carts);
         $deliveryOptions = $checkoutService->getDeliveryOptions($summary['subtotal']);
+        $shippingAddress = trim((string) $user->getShippingAddress());
+        $billingAddress = trim((string) $user->getBillingAddress());
 
         return $this->render('order/summary.html.twig', [
             'items' => $summary['items'],
@@ -37,6 +39,9 @@ final class OrderController extends AbstractController
             'subtotal' => $summary['subtotal'],
             'deliveryOptions' => $deliveryOptions,
             'selectedDelivery' => 'basic',
+            'shippingAddress' => $shippingAddress,
+            'billingAddress' => $billingAddress,
+            'hasRequiredAddresses' => '' !== $shippingAddress && '' !== $billingAddress,
         ]);
     }
 
@@ -60,11 +65,19 @@ final class OrderController extends AbstractController
 
         $carts = $cartRepository->findBy(['customer' => $user], ['id' => 'DESC']);
         $summary = $checkoutService->summarizeCart($carts);
+        $shippingAddress = trim((string) $user->getShippingAddress());
+        $billingAddress = trim((string) $user->getBillingAddress());
 
         if (empty($summary['items'])) {
             $this->addFlash('danger', 'Votre panier est vide.');
 
             return $this->redirectToRoute('app_cart_index');
+        }
+
+        if ('' === $shippingAddress || '' === $billingAddress) {
+            $this->addFlash('danger', 'Vous devez renseigner votre adresse de livraison et votre adresse de facturation avant de commander.');
+
+            return $this->redirectToRoute('app_my_account_edit');
         }
 
         $deliveryCode = (string) $request->request->get('delivery_method', 'basic');

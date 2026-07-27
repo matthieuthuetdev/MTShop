@@ -75,6 +75,8 @@ final class CheckoutService
         $now ??= new DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
         $hour = (int) $now->format('G');
 
+        $expressAvailable = $hour < 15;
+        $nextDayAvailable = $hour < 12;
         $basicFee = $subtotal > 50.0 ? 0.0 : 5.0;
 
         return [
@@ -84,8 +86,8 @@ final class CheckoutService
                 'description' => 'Livraison en 1h, 20 €.',
                 'note' => 'Si commande passée avant 15h, livraison entre 18h et 20h le même jour. Offre soumise à condition.',
                 'fee' => 20.0,
-                'available' => $hour < 15,
-                'estimate' => $hour < 15 ? 'Aujourd’hui entre 18h et 20h' : 'Disponible uniquement avant 15h',
+                'available' => $expressAvailable,
+                'estimate' => $expressAvailable ? 'Aujourd’hui entre 18h et 20h' : 'Surlendemain',
             ],
             'next_day' => [
                 'code' => 'next_day',
@@ -93,8 +95,8 @@ final class CheckoutService
                 'description' => 'Si la commande est passée avant midi, livraison le lendemain, 10 €.',
                 'note' => 'Disponible uniquement si la commande est passée avant 12h.',
                 'fee' => 10.0,
-                'available' => $hour < 12,
-                'estimate' => $hour < 12 ? 'Demain' : 'Disponible uniquement avant 12h',
+                'available' => $nextDayAvailable,
+                'estimate' => $nextDayAvailable ? 'Demain' : 'Surlendemain',
             ],
             'basic' => [
                 'code' => 'basic',
