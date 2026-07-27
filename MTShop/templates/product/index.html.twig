@@ -4,20 +4,50 @@
 
 {% block body %}
 <section class="container py-5">
-    <div class="mb-4">
-        <h1 class="display-5 fw-bold mb-2">Nos produits</h1>
-        <p class="text-secondary mb-0">La liste des produits disponibles dans la boutique.</p>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+        <div>
+            <h1 class="display-5 fw-bold mb-2">Nos produits</h1>
+            <p class="text-secondary mb-0">Tous les produits disponibles sont affichés par ordre alphabétique.</p>
+        </div>
     </div>
 
-    <div class="d-grid gap-3">
+    <div class="row g-4">
         {% for product in products %}
-            <div class="border rounded-3 p-3">
-                <h2 class="h4 mb-1">{{ product.name }}</h2>
-                <p class="mb-1">{{ product.description }}</p>
-                <p class="mb-0">{{ product.price|number_format(2, ',', ' ') }} €</p>
+            {% set discountedPrice = product.price * (100 - product.promotion) / 100 %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
+                    <div class="w-100 bg-primary" style="height: 240px;"></div>
+                    <div class="p-4 d-grid gap-3">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <h2 class="h4 fw-bold mb-0">{{ product.name }}</h2>
+                            {% if product.promotion > 0 %}
+                                <span class="badge text-bg-primary rounded-pill px-3 py-2">-{{ product.promotion }} %</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-secondary mb-0">{{ product.description }}</p>
+                        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+                            <div>
+                                {% if product.promotion > 0 %}
+                                    <div class="fw-semibold text-decoration-line-through text-secondary">
+                                        {{ product.price|number_format(0, ',', ' ') }} €
+                                    </div>
+                                    <strong class="fs-4">{{ discountedPrice|number_format(0, ',', ' ') }} €</strong>
+                                {% else %}
+                                    <strong class="fs-4">{{ product.price|number_format(0, ',', ' ') }} €</strong>
+                                {% endif %}
+                            </div>
+                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cart_add_' ~ product.id) }}">
+                                <button type="submit" class="btn btn-primary fw-semibold text-white">Ajouter au panier</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
             </div>
         {% else %}
-            <p class="mb-0 text-secondary">Aucun produit à afficher.</p>
+            <div class="col-12">
+                <p class="text-secondary mb-0">Aucun produit à afficher.</p>
+            </div>
         {% endfor %}
     </div>
 </section>
