@@ -16,6 +16,35 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
+    /**
+     * @return Product[]
+     */
+    public function findAlphabeticalActiveProducts(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isActive = :isActive')
+            ->setParameter('isActive', true)
+            ->orderBy('p.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Product[]
+     */
+    public function findPromotedActiveProducts(int $limit = 3): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isActive = :isActive')
+            ->andWhere('p.promotion > 0')
+            ->setParameter('isActive', true)
+            ->orderBy('p.promotion', 'DESC')
+            ->addOrderBy('p.name', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Product[] Returns an array of Product objects
     //     */

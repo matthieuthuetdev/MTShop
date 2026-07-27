@@ -18,7 +18,7 @@
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_home_page' %}active{% endif %}" aria-current="page" href="{{ path('app_home_page') }}" data-turbo="false">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Nos produits</a>
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_products_index' %}active{% endif %}" href="{{ path('app_products_index') }}" data-turbo="false">Nos produits</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Nos meilleurs vantes</a>
