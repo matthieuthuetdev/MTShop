@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos produits | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="mb-4">
+        <h1 class="display-5 fw-bold mb-2">Nos produits</h1>
+        <p class="text-secondary mb-0">La liste des produits disponibles dans la boutique.</p>
+    </div>
+
+    <div class="d-grid gap-3">
+        {% for product in products %}
+            <div class="border rounded-3 p-3">
+                <h2 class="h4 mb-1">{{ product.name }}</h2>
+                <p class="mb-1">{{ product.description }}</p>
+                <p class="mb-0">{{ product.price|number_format(2, ',', ' ') }} €</p>
+            </div>
+        {% else %}
+            <p class="mb-0 text-secondary">Aucun produit à afficher.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
