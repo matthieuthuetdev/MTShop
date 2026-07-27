@@ -39,13 +39,19 @@ class Order
     #[ORM\Column(length: 50)]
     private ?string $paymentStatus = 'pending';
 
+    #[ORM\Column(length: 50)]
+    private ?string $deliveryMethod = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $deliveryFee = '0.00';
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, OrderItem>
      */
-    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef')]
+    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef', cascade: ['persist'], orphanRemoval: true)]
     private Collection $orderItems;
 
     public function __construct()
@@ -139,6 +145,30 @@ class Order
     public function setPaymentStatus(string $paymentStatus): static
     {
         $this->paymentStatus = $paymentStatus;
+
+        return $this;
+    }
+
+    public function getDeliveryMethod(): ?string
+    {
+        return $this->deliveryMethod;
+    }
+
+    public function setDeliveryMethod(string $deliveryMethod): static
+    {
+        $this->deliveryMethod = $deliveryMethod;
+
+        return $this;
+    }
+
+    public function getDeliveryFee(): ?string
+    {
+        return $this->deliveryFee;
+    }
+
+    public function setDeliveryFee(string $deliveryFee): static
+    {
+        $this->deliveryFee = $deliveryFee;
 
         return $this;
     }
