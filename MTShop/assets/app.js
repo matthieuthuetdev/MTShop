@@ -1,10 +1,69 @@
 import './stimulus_bootstrap.js';
-/*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
- */
 import './styles/app.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('productSearch');
+    const sortSelect = document.getElementById('productSort');
+    const productsContainer = document.getElementById('productsContainer');
+
+    if (!searchInput || !sortSelect || !productsContainer) {
+        return;
+    }
+
+    const filterProducts = () => {
+        const search = searchInput.value.trim().toLowerCase();
+        const products = [...productsContainer.querySelectorAll('.product-card')];
+
+        products.forEach(product => {
+            const name = product.dataset.name;
+
+            if (name.includes(search)) {
+                product.style.display = '';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    };
+
+    const sortProducts = () => {
+        const products = [...productsContainer.querySelectorAll('.product-card')];
+
+        products.sort((a, b) => {
+            switch (sortSelect.value) {
+                case 'za':
+                    return b.dataset.name.localeCompare(a.dataset.name);
+
+                case 'priceAsc':
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+
+                case 'priceDesc':
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+
+                case 'az':
+                default:
+                    return a.dataset.name.localeCompare(b.dataset.name);
+            }
+        });
+
+        products.forEach(product => {
+            productsContainer.appendChild(product);
+        });
+    };
+
+    searchInput.addEventListener('input', filterProducts);
+
+    searchInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            filterProducts();
+        }
+    });
+
+    sortSelect.addEventListener('change', () => {
+        sortProducts();
+        filterProducts();
+    });
+
+    sortProducts();
+    filterProducts();
+});

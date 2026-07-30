@@ -4,41 +4,100 @@
 
 {% block body %}
 <section class="container py-5">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
-        <div>
-            <h1 class="display-5 fw-bold mb-2">Nos produits</h1>
-            <p class="text-secondary mb-0">Tous les produits disponibles sont affichés par ordre alphabétique.</p>
-        </div>
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold mb-4">Nos produits</h1>
+
+        <form role="search" aria-label="Recherche de produits">
+            <div class="row g-3">
+                <div class="col-12 col-lg-6">
+                    <label for="productSearch" class="visually-hidden">
+                        Rechercher un produit
+                    </label>
+
+                    <input
+                        type="search"
+                        id="productSearch"
+                        class="form-control border border-2 rounded-4 shadow-sm"
+                        style="border-color: #0b1f3a !important; height: 56px;"
+                        placeholder="Rechercher un produit..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label for="productSort" class="visually-hidden">
+                        Trier les produits
+                    </label>
+
+                    <select
+                        id="productSort"
+                        class="form-select border border-2 rounded-4 shadow-sm"
+                        style="border-color: #0b1f3a !important; height: 56px;"
+                    >
+                        <option value="az" selected>A - Z</option>
+                        <option value="za">Z - A</option>
+                        <option value="priceAsc">Prix croissant</option>
+                        <option value="priceDesc">Prix décroissant</option>
+                    </select>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4" id="productsContainer">
         {% for product in products %}
             {% set discountedPrice = product.price * (100 - product.promotion) / 100 %}
-            <div class="col-12 col-md-6 col-xl-4">
+
+            <div
+                class="col-12 col-md-6 col-xl-4 product-card"
+                data-name="{{ product.name|lower }}"
+                data-price="{{ discountedPrice }}"
+            >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
                     <div class="w-100 bg-primary" style="height: 240px;"></div>
+
                     <div class="p-4 d-grid gap-3">
                         <div class="d-flex align-items-start justify-content-between gap-3">
                             <h2 class="h4 fw-bold mb-0">{{ product.name }}</h2>
+
                             {% if product.promotion > 0 %}
-                                <span class="badge text-bg-primary rounded-pill px-3 py-2">-{{ product.promotion }} %</span>
+                                <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                                    -{{ product.promotion }} %
+                                </span>
                             {% endif %}
                         </div>
-                        <p class="text-secondary mb-0">{{ product.description }}</p>
+
+                        <p class="text-secondary mb-0">
+                            {{ product.description }}
+                        </p>
+
                         <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
                             <div>
                                 {% if product.promotion > 0 %}
                                     <div class="fw-semibold text-decoration-line-through text-secondary">
                                         {{ product.price|number_format(0, ',', ' ') }} €
                                     </div>
-                                    <strong class="fs-4">{{ discountedPrice|number_format(0, ',', ' ') }} €</strong>
+
+                                    <strong class="fs-4">
+                                        {{ discountedPrice|number_format(0, ',', ' ') }} €
+                                    </strong>
                                 {% else %}
-                                    <strong class="fs-4">{{ product.price|number_format(0, ',', ' ') }} €</strong>
+                                    <strong class="fs-4">
+                                        {{ product.price|number_format(0, ',', ' ') }} €
+                                    </strong>
                                 {% endif %}
                             </div>
+
                             <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}">
-                                <input type="hidden" name="_token" value="{{ csrf_token('cart_add_' ~ product.id) }}">
-                                <button type="submit" class="btn btn-primary fw-semibold text-white">Ajouter au panier</button>
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('cart_add_' ~ product.id) }}"
+                                >
+
+                                <button type="submit" class="btn btn-primary fw-semibold text-white">
+                                    Ajouter au panier
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -46,7 +105,9 @@
             </div>
         {% else %}
             <div class="col-12">
-                <p class="text-secondary mb-0">Aucun produit à afficher.</p>
+                <p class="text-secondary mb-0">
+                    Aucun produit à afficher.
+                </p>
             </div>
         {% endfor %}
     </div>
