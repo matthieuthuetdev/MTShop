@@ -50,8 +50,18 @@
 
             <div
                 class="col-12 col-md-6 col-xl-4 product-card"
-                data-name="{{ product.name|lower }}"
-                data-price="{{ discountedPrice }}"
+                role="button"
+                tabindex="0"
+                style="cursor: pointer;"
+                data-name="{{ product.name }}"
+                data-description="{{ product.description }}"
+                data-price="{{ product.price }}"
+                data-discounted-price="{{ discountedPrice }}"
+                data-promotion="{{ product.promotion }}"
+                data-id="{{ product.id }}"
+                data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
+                data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                data-image-name="{{ product.imageName|default('') }}"
             >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
                     <div class="w-100 bg-primary" style="height: 240px;"></div>
@@ -88,14 +98,14 @@
                                 {% endif %}
                             </div>
 
-                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}">
+                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}" data-no-modal="true">
                                 <input
                                     type="hidden"
                                     name="_token"
                                     value="{{ csrf_token('cart_add_' ~ product.id) }}"
                                 >
 
-                                <button type="submit" class="btn btn-primary fw-semibold text-white">
+                                <button type="submit" class="btn btn-primary fw-semibold text-white" data-no-modal="true">
                                     Ajouter au panier
                                 </button>
                             </form>
@@ -110,6 +120,39 @@
                 </p>
             </div>
         {% endfor %}
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalProductDescription">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+                <div class="modal-header border-0 justify-content-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row gy-4">
+                        <div class="col-lg-5">
+                            <div id="modalProductImage" class="bg-primary rounded-4" style="height:420px;"></div>
+                        </div>
+
+                        <div class="col-lg-7 d-flex flex-column gap-4">
+                            <div>
+                                <h2 class="h4 fw-bold mb-3" id="modalTitle"></h2>
+                                <div id="modalProductPriceContainer" class="mb-3"></div>
+                                <p class="text-secondary mb-0" id="modalProductDescription"></p>
+                            </div>
+
+                            <form id="modalAddToCartForm" method="post" action="#" class="mt-auto d-flex justify-content-end">
+                                <input type="hidden" name="_token" id="modalCartToken" value="">
+                                <button type="submit" class="btn btn-primary fw-semibold text-white">
+                                    Ajouter au panier
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}
