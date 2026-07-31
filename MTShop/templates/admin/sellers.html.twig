@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les vendeurs | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 fw-bold mb-0">Gérer les vendeurs</h1>
+            <p class="text-secondary mb-0">Liste des vendeurs enregistrés.</p>
+        </div>
+    </div>
+
+    <div class="rounded-4 border border-2 bg-white p-4 shadow-sm">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for seller in sellers %}
+                    <tr>
+                        <td>{{ seller.firstName }} {{ seller.lastName }}</td>
+                        <td>{{ seller.email }}</td>
+                        <td>
+                            <!-- Actions à implémenter: promote/demote, edit, delete -->
+                            <a href="#" class="btn btn-sm btn-outline-primary">Voir</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-secondary">Aucun vendeur trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
