@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Seller dashboard | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="display-5 fw-bold mb-2">Mes produits</h1>
+            <p class="fs-5 text-secondary mb-0">Gérez vos produits et vos stocks depuis votre dashboard vendeur.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg fw-semibold" data-bs-toggle="modal" data-bs-target="#productNewModal" data-action="new">Ajouter un produit</button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="w-25">Produit</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Catégorie</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-4 overflow-hidden" style="width: 96px; height: 96px;">
+                                            {% if product.imageName %}
+                                                <img src="{{ asset('uploads/products/' ~ product.imageName) }}" alt="{{ product.name }}" class="img-fluid h-100 w-100" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-secondary bg-opacity-10 w-100 h-100 d-flex align-items-center justify-content-center text-secondary small">
+                                                    Aucune image
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ product.name }}</div>
+                                            <div class="text-secondary">{{ product.description|slice(0, 70) ~ (product.description|length > 70 ? '…' : '') }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.price / 100 | number_format(2, ',', ' ') }} €</td>
+                                <td>{{ product.stock }}</td>
+                                <td>{{ product.category ?: '—' }}</td>
+                                <td>{{ product.isActive ? 'Actif' : 'Inactif' }}</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#productEditModal-{{ product.id }}">Modifier</button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="{{ product.id }}" data-delete-token="{{ csrf_token('delete_product_' ~ product.id) }}" data-product-name="{{ product.name }}">Supprimer</button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary">Aucun produit trouvé.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productNewModal" tabindex="-1" aria-labelledby="productNewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="productNewModalLabel">Ajouter un produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="rounded-4 bg-white p-4">
+                        {{ form_start(newProductForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                            {% include 'seller/_product_form.html.twig' %}
+                            <div class="mt-4 d-flex justify-content-end gap-3">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Créer le produit</button>
+                            </div>
+                        {{ form_end(newProductForm) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Voulez-vous vraiment supprimer le produit <strong id="deleteProductName"></strong> ? Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form id="deleteProductForm" method="post" action="">
+                        <input type="hidden" name="_token" id="deleteProductToken" value="">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for product in products %}
+        <div class="modal fade" id="productEditModal-{{ product.id }}" tabindex="-1" aria-labelledby="productEditModalLabel-{{ product.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="productEditModalLabel-{{ product.id }}">Modifier le produit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="rounded-4 bg-white p-4">
+                            {{ form_start(editProductForms[product.id], {'attr': {'enctype': 'multipart/form-data'}}) }}
+                                {% include 'seller/_product_form.html.twig' %}
+                                <div class="mt-4 d-flex justify-content-end gap-3">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            {{ form_end(editProductForms[product.id]) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}
