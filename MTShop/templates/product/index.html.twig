@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos produits | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold mb-4">Nos produits</h1>
+
+        <form role="search" aria-label="Recherche de produits">
+            <div class="row g-3">
+                <div class="col-12 col-lg-6">
+                    <label for="productSearch" class="visually-hidden">
+                        Rechercher un produit
+                    </label>
+
+                    <input
+                        type="search"
+                        id="productSearch"
+                        class="form-control border border-2 rounded-4 shadow-sm"
+                        style="border-color: #0b1f3a !important; height: 56px;"
+                        placeholder="Rechercher un produit..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label for="productSort" class="visually-hidden">
+                        Trier les produits
+                    </label>
+
+                    <select
+                        id="productSort"
+                        class="form-select border border-2 rounded-4 shadow-sm"
+                        style="border-color: #0b1f3a !important; height: 56px;"
+                    >
+                        <option value="az" selected>A - Z</option>
+                        <option value="za">Z - A</option>
+                        <option value="priceAsc">Prix croissant</option>
+                        <option value="priceDesc">Prix décroissant</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4" id="productsContainer">
+        {% for product in products %}
+            {% set discountedPrice = product.price * (100 - product.promotion) / 100 %}
+
+            <div
+                class="col-12 col-md-6 col-xl-4 product-card"
+                role="button"
+                tabindex="0"
+                style="cursor: pointer;"
+                data-name="{{ product.name }}"
+                data-description="{{ product.description }}"
+                data-price="{{ product.price }}"
+                data-discounted-price="{{ discountedPrice }}"
+                data-promotion="{{ product.promotion }}"
+                data-id="{{ product.id }}"
+                data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
+                data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                data-image-name="{{ product.imageName|default('') }}"
+            >
+                <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
+                    <div class="w-100 bg-primary" style="height: 240px;"></div>
+
+                    <div class="p-4 d-grid gap-3">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <h2 class="h4 fw-bold mb-0">{{ product.name }}</h2>
+
+                            {% if product.promotion > 0 %}
+                                <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                                    -{{ product.promotion }} %
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-secondary mb-0">
+                            {{ product.description }}
+                        </p>
+
+                        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+                            <div>
+                                {% if product.promotion > 0 %}
+                                    <div class="fw-semibold text-decoration-line-through text-secondary">
+                                        {{ product.price|number_format(0, ',', ' ') }} €
+                                    </div>
+
+                                    <strong class="fs-4">
+                                        {{ discountedPrice|number_format(0, ',', ' ') }} €
+                                    </strong>
+                                {% else %}
+                                    <strong class="fs-4">
+                                        {{ product.price|number_format(0, ',', ' ') }} €
+                                    </strong>
+                                {% endif %}
+                            </div>
+
+                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}" data-no-modal="true">
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('cart_add_' ~ product.id) }}"
+                                >
+
+                                <button type="submit" class="btn btn-primary fw-semibold text-white" data-no-modal="true">
+                                    Ajouter au panier
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <p class="text-secondary mb-0">
+                    Aucun produit à afficher.
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalProductDescription">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+                <div class="modal-header border-0 justify-content-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row gy-4">
+                        <div class="col-lg-5">
+                            <div id="modalProductImage" class="bg-primary rounded-4" style="height:420px;"></div>
+                        </div>
+
+                        <div class="col-lg-7 d-flex flex-column gap-4">
+                            <div>
+                                <h2 class="h4 fw-bold mb-3" id="modalTitle"></h2>
+                                <div id="modalProductPriceContainer" class="mb-3"></div>
+                                <p class="text-secondary mb-0" id="modalProductDescription"></p>
+                            </div>
+
+                            <form id="modalAddToCartForm" method="post" action="#" class="mt-auto d-flex justify-content-end">
+                                <input type="hidden" name="_token" id="modalCartToken" value="">
+                                <button type="submit" class="btn btn-primary fw-semibold text-white">
+                                    Ajouter au panier
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
