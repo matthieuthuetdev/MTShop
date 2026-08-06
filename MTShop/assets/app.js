@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.getElementById('productSort');
     const productsContainer = document.getElementById('productsContainer');
 
-    if (!searchInput || !sortSelect || !productsContainer) {
+    if (!productsContainer) {
         return;
     }
 
@@ -43,22 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    searchInput.addEventListener('input', filterProducts);
+    if (searchInput) {
+        searchInput.addEventListener('input', filterProducts);
 
-    searchInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
+        searchInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                filterProducts();
+            }
+        });
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            sortProducts();
             filterProducts();
-        }
-    });
+        });
+    }
 
-    sortSelect.addEventListener('change', () => {
+    if (searchInput && sortSelect) {
         sortProducts();
         filterProducts();
-    });
-
-    sortProducts();
-    filterProducts();
+    }
 
     const productModalElement = document.getElementById('productModal');
     const productModal = productModalElement ? new bootstrap.Modal(productModalElement) : null;
