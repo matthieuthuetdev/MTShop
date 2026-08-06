@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const discountedPrice = parseFloat(card.dataset.discountedPrice) || price;
         const promotion = parseInt(card.dataset.promotion, 10) || 0;
         const csrfToken = card.dataset.csrfToken || '';
-        const imageName = card.dataset.imageName || '';
+        const imageUrl = card.dataset.imageUrl || '';
 
         modalTitle.textContent = name;
         modalProductDescription.textContent = description;
@@ -106,8 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
             modalProductPriceContainer.innerHTML = `<strong class="fs-4">${price.toFixed(0)} €</strong>`;
         }
 
-        modalProductImage.innerHTML = imageName
-            ? `<img src="/uploads/products/${imageName}" alt="${name}" class="img-fluid rounded-4 w-100" style="height:420px; object-fit:cover;">`
+        modalProductImage.innerHTML = imageUrl
+            ? `<img src="${imageUrl}" alt="${name}" class="img-fluid rounded-4 w-100" style="height:420px; object-fit:cover;">`
             : '<div class="bg-primary rounded-4" style="height:420px;"></div>';
 
         modalForm.action = card.dataset.addToCartUrl || '#';
