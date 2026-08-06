@@ -26,9 +26,6 @@
                 </article>
             </div>
         </div>
-        <div class="mt-4 d-flex justify-content-center">
-            <a class="btn btn-primary btn-lg px-4 py-3 fw-semibold" href="{{ path('app_products_index') }}" data-turbo="false">Voir tous nos produits</a>
-        </div>
     </div>
 </section>
 
@@ -95,6 +92,10 @@
                 <p class="text-secondary mb-0">Aucune promotion disponible pour le moment.</p>
             </div>
         {% endfor %}
+    </div>
+
+    <div class="mt-5 d-flex justify-content-center">
+        <a class="btn btn-primary btn-lg px-4 py-3 fw-semibold" href="{{ path('app_products_index') }}" data-turbo="false">Voir tous les produits</a>
     </div>
 </section>
 

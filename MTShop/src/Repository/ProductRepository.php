@@ -38,8 +38,7 @@ class ProductRepository extends ServiceEntityRepository
             ->andWhere('p.isActive = :isActive')
             ->andWhere('p.promotion > 0')
             ->setParameter('isActive', true)
-            ->orderBy('p.promotion', 'DESC')
-            ->addOrderBy('p.name', 'ASC')
+            ->orderBy('RAND()')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
