@@ -62,6 +62,7 @@
                 data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
                 data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
                 data-image-name="{{ product.imageName|default('') }}"
+                data-image-url="{{ product.imageName ? asset('uploads/products/' ~ product.imageName) : '' }}"
             >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
                     {% if product.imageName %}
