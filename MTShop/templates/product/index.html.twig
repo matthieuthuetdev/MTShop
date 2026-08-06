@@ -62,9 +62,19 @@
                 data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
                 data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
                 data-image-name="{{ product.imageName|default('') }}"
+                data-image-url="{{ product.imageName ? asset('uploads/products/' ~ product.imageName) : '' }}"
             >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
-                    <div class="w-100 bg-primary" style="height: 240px;"></div>
+                    {% if product.imageName %}
+                        <img
+                            src="{{ asset('uploads/products/' ~ product.imageName) }}"
+                            alt="{{ product.name }}"
+                            class="w-100 rounded-top"
+                            style="height: 240px; object-fit: cover; display: block;"
+                        >
+                    {% else %}
+                        <div class="w-100 bg-primary" style="height: 240px;"></div>
+                    {% endif %}
 
                     <div class="p-4 d-grid gap-3">
                         <div class="d-flex align-items-start justify-content-between gap-3">

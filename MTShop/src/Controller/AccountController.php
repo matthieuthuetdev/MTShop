@@ -138,13 +138,47 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $shippingAddress = trim((string) $request->request->get('shippingAddress', ''));
-        $billingAddress = trim((string) $request->request->get('billingAddress', ''));
+        $shippingLine1 = trim((string) $request->request->get('shippingLine1', ''));
+        $shippingPostalCode = trim((string) $request->request->get('shippingPostalCode', ''));
+        $shippingCity = trim((string) $request->request->get('shippingCity', ''));
+        $shippingCountry = trim((string) $request->request->get('shippingCountry', ''));
+        $billingSameAsShipping = (string) $request->request->get('billingSameAsShipping', 'yes');
 
-        if ('' === $shippingAddress || '' === $billingAddress) {
-            $this->addFlash('danger', 'Les adresses de livraison et de facturation sont obligatoires.');
+        if ('' === $shippingLine1 || '' === $shippingPostalCode || '' === $shippingCity || '' === $shippingCountry) {
+            $this->addFlash('danger', 'Tous les champs de l’adresse de livraison sont obligatoires.');
 
             return $this->redirectToRoute('app_my_account_edit');
+        }
+
+        $shippingAddress = sprintf(
+            "%s\n%s %s\n%s",
+            $shippingLine1,
+            $shippingPostalCode,
+            $shippingCity,
+            $shippingCountry,
+        );
+
+        if ('yes' === $billingSameAsShipping) {
+            $billingAddress = $shippingAddress;
+        } else {
+            $billingLine1 = trim((string) $request->request->get('billingLine1', ''));
+            $billingPostalCode = trim((string) $request->request->get('billingPostalCode', ''));
+            $billingCity = trim((string) $request->request->get('billingCity', ''));
+            $billingCountry = trim((string) $request->request->get('billingCountry', ''));
+
+            if ('' === $billingLine1 || '' === $billingPostalCode || '' === $billingCity || '' === $billingCountry) {
+                $this->addFlash('danger', 'Tous les champs de l’adresse de facturation sont obligatoires lorsque cette adresse est différente.');
+
+                return $this->redirectToRoute('app_my_account_edit');
+            }
+
+            $billingAddress = sprintf(
+                "%s\n%s %s\n%s",
+                $billingLine1,
+                $billingPostalCode,
+                $billingCity,
+                $billingCountry,
+            );
         }
 
         $user->setShippingAddress($shippingAddress);
