@@ -34,14 +34,23 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findPromotedActiveProducts(int $limit = 3): array
     {
-        return $this->createQueryBuilder('p')
+        $products = $this->createQueryBuilder('p')
             ->andWhere('p.isActive = :isActive')
             ->andWhere('p.promotion > 0')
             ->setParameter('isActive', true)
-            ->orderBy('RAND()')
-            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+
+        if (
+            count($products) <= $limit ||
+            count($products) === 0
+        ) {
+            return $products;
+        }
+
+        shuffle($products);
+
+        return array_slice($products, 0, $limit);
     }
 
     //    /**
