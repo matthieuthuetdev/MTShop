@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes produits{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Mes produits</h1>
+        <a href="{{ path('product_crud_new') }}" class="btn btn-primary">Nouveau produit</a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.price / 100 | number_format(2, ',', ' ') }} €</td>
+                        <td>{{ product.stock }}</td>
+                        <td>
+                            <a href="{{ path('product_crud_show', {id: product.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+                            <a href="{{ path('product_crud_edit', {id: product.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+                            <form method="post" action="{{ path('product_crud_delete', {id: product.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce produit ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-product-' ~ product.id) }}">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">Aucun produit disponible.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

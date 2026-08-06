@@ -61,11 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filterProducts();
 
     const productModalElement = document.getElementById('productModal');
-    if (!productModalElement) {
-        return;
-    }
-
-    const productModal = new bootstrap.Modal(productModalElement);
+    const productModal = productModalElement ? new bootstrap.Modal(productModalElement) : null;
     const modalTitle = document.getElementById('modalTitle');
     const modalProductDescription = document.getElementById('modalProductDescription');
     const modalProductPriceContainer = document.getElementById('modalProductPriceContainer');
@@ -76,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastFocusedElement = null;
 
     const openProductModal = (card) => {
+        if (!productModal || !modalTitle || !modalProductDescription || !modalProductPriceContainer || !modalProductImage || !modalForm || !modalCartToken) {
+            return;
+        }
+
         lastFocusedElement = document.activeElement;
 
         const name = card.dataset.name || '';
@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const price = parseFloat(card.dataset.price) || 0;
         const discountedPrice = parseFloat(card.dataset.discountedPrice) || price;
         const promotion = parseInt(card.dataset.promotion, 10) || 0;
-        const productId = card.dataset.id;
         const csrfToken = card.dataset.csrfToken || '';
         const imageName = card.dataset.imageName || '';
 
@@ -141,16 +140,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    productModalElement.addEventListener('shown.bs.modal', () => {
-        const focusTarget = modalForm.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
-        if (focusTarget) {
-            focusTarget.focus();
-        }
-    });
+    if (productModalElement) {
+        productModalElement.addEventListener('shown.bs.modal', () => {
+            const focusTarget = modalForm.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+            if (focusTarget) {
+                focusTarget.focus();
+            }
+        });
 
-    productModalElement.addEventListener('hidden.bs.modal', () => {
-        if (lastFocusedElement) {
-            lastFocusedElement.focus();
-        }
-    });
+        productModalElement.addEventListener('hidden.bs.modal', () => {
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
+        });
+    }
+
+    const deleteModalElement = document.getElementById('deleteModal');
+    if (deleteModalElement) {
+        deleteModalElement.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            if (!button) {
+                return;
+            }
+
+            const productId = button.getAttribute('data-product-id');
+            const productName = button.getAttribute('data-product-name');
+            const deleteToken = button.getAttribute('data-delete-token');
+            const deleteForm = deleteModalElement.querySelector('#deleteProductForm');
+            const deleteProductName = deleteModalElement.querySelector('#deleteProductName');
+            const deleteProductToken = deleteModalElement.querySelector('#deleteProductToken');
+
+            if (deleteForm && productId) {
+                deleteForm.action = `/seller/product/${productId}/delete`;
+            }
+
+            if (deleteProductName && productName) {
+                deleteProductName.textContent = productName;
+            }
+
+            if (deleteProductToken && deleteToken) {
+                deleteProductToken.value = deleteToken;
+            }
+        });
+    }
 });

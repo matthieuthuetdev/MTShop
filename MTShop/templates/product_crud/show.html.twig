@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails produit{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1>{{ product.name }}</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="card-text"><strong>Prix :</strong> {{ product.price / 100 | number_format(2, ',', ' ') }} €</p>
+                    <p class="card-text"><strong>Stock :</strong> {{ product.stock }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('product_crud_edit', {id: product.id}) }}" class="btn btn-primary">Modifier</a>
+        <a href="{{ path('product_crud_index') }}" class="btn btn-secondary">Retour</a>
+    </div>
+</div>
+{% endblock %}
