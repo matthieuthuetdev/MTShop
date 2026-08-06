@@ -26,9 +26,8 @@
                 </article>
             </div>
         </div>
-        <div class="mt-4 d-flex flex-column flex-sm-row gap-3 justify-content-center">
-            <a class="btn btn-primary btn-lg px-4 py-3 fw-semibold" href="{{ path('app_products_index') }}" data-turbo="false">Commencer vos achats</a>
-            <a class="btn btn-outline-primary btn-lg px-4 py-3 fw-semibold" href="{{ path('app_products_index') }}" data-turbo="false">Voir tous nos produits</a>
+        <div class="mt-4 d-flex justify-content-center">
+            <a class="btn btn-primary btn-lg px-4 py-3 fw-semibold" href="{{ path('app_products_index') }}" data-turbo="false">Voir tous nos produits</a>
         </div>
     </div>
 </section>
@@ -41,12 +40,35 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4" id="productsContainer">
         {% for product in promotedProducts %}
             {% set discountedPrice = product.price * (100 - product.promotion) / 100 %}
-            <div class="col-12 col-md-6 col-xl-4">
+            <div
+                class="col-12 col-md-6 col-xl-4 product-card"
+                role="button"
+                tabindex="0"
+                style="cursor: pointer;"
+                data-name="{{ product.name }}"
+                data-description="{{ product.description }}"
+                data-price="{{ product.price }}"
+                data-discounted-price="{{ discountedPrice }}"
+                data-promotion="{{ product.promotion }}"
+                data-id="{{ product.id }}"
+                data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
+                data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                data-image-name="{{ product.imageName|default('') }}"
+            >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
-                    <div class="w-100 bg-primary" style="height: 240px;"></div>
+                    {% if product.imageName %}
+                        <img
+                            src="{{ asset('uploads/products/' ~ product.imageName) }}"
+                            alt="{{ product.name }}"
+                            class="w-100 rounded-top"
+                            style="height: 240px; object-fit: cover; display: block;"
+                        >
+                    {% else %}
+                        <div class="w-100 bg-primary" style="height: 240px;"></div>
+                    {% endif %}
                     <div class="p-4 d-grid gap-3">
                         <div class="d-flex align-items-start justify-content-between gap-3">
                             <h3 class="h4 fw-bold mb-0">{{ product.name }}</h3>
@@ -60,9 +82,9 @@
                                 </div>
                                 <strong class="fs-4">{{ discountedPrice|number_format(0, ',', ' ') }} €</strong>
                             </div>
-                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}">
+                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}" data-no-modal="true">
                                 <input type="hidden" name="_token" value="{{ csrf_token('cart_add_' ~ product.id) }}">
-                                <button type="submit" class="btn btn-primary fw-semibold text-white">Ajouter au panier</button>
+                                <button type="submit" class="btn btn-primary fw-semibold text-white" data-no-modal="true">Ajouter au panier</button>
                             </form>
                         </div>
                     </div>
@@ -75,4 +97,37 @@
         {% endfor %}
     </div>
 </section>
+
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalProductDescription">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+            <div class="modal-header border-0 justify-content-end">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row gy-4">
+                    <div class="col-lg-5">
+                        <div id="modalProductImage" class="bg-primary rounded-4" style="height:420px;"></div>
+                    </div>
+
+                    <div class="col-lg-7 d-flex flex-column gap-4">
+                        <div>
+                            <h2 class="h4 fw-bold mb-3" id="modalTitle"></h2>
+                            <div id="modalProductPriceContainer" class="mb-3"></div>
+                            <p class="text-secondary mb-0" id="modalProductDescription"></p>
+                        </div>
+
+                        <form id="modalAddToCartForm" method="post" action="#" class="mt-auto d-flex justify-content-end">
+                            <input type="hidden" name="_token" id="modalCartToken" value="">
+                            <button type="submit" class="btn btn-primary fw-semibold text-white">
+                                Ajouter au panier
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
