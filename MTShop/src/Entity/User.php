@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -40,11 +41,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $twoFactorCodeExpiresAt = null;
 
-    /**
-     * @var list<string>
-     */
-    #[ORM\Column]
-    private array $roles = [];
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: UserRole::class, options: ['default' => 'BUYER'])]
+    private UserRole $role = UserRole::BUYER;
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
@@ -162,23 +160,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return list<string>
-     */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        $roles[] = 'ROLE_USER';
-
-        return array_values(array_unique($roles));
+        return [
+            'ROLE_USER',
+            'ROLE_' . $this->role->value,
+        ];
     }
 
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
+    public function getRole(): UserRole
     {
-        $this->roles = $roles;
+        return $this->role;
+    }
+
+    public function setRole(UserRole $role): static
+    {
+        $this->role = $role;
 
         return $this;
     }

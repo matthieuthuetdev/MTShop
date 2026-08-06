@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Enum\UserRole;
 use App\Entity\User;
 use App\Form\SignUpType;
 use App\Repository\UserRepository;
@@ -36,7 +37,7 @@ final class SignUpController extends AbstractController
                 $user->setFirstName((string) $form->get('firstName')->getData());
                 $user->setLastName((string) $form->get('lastName')->getData());
                 $user->setEmail($email);
-                $user->setRoles(['ROLE_USER']);
+                $user->setRole(UserRole::BUYER);
                 $user->setPassword(
                     $passwordHasher->hashPassword(
                         $user,
