@@ -29,6 +29,10 @@ final class OrderController extends AbstractController
 
         $carts = $cartRepository->findBy(['customer' => $user], ['id' => 'DESC']);
         $summary = $checkoutService->summarizeCart($carts);
+        if (empty($summary['items'])) {
+            return $this->redirectToRoute('app_home_page');
+        }
+
         $deliveryOptions = $checkoutService->getDeliveryOptions($summary['subtotal']);
         $shippingAddress = trim((string) $user->getShippingAddress());
         $billingAddress = trim((string) $user->getBillingAddress());
@@ -69,9 +73,7 @@ final class OrderController extends AbstractController
         $billingAddress = trim((string) $user->getBillingAddress());
 
         if (empty($summary['items'])) {
-            $this->addFlash('danger', 'Votre panier est vide.');
-
-            return $this->redirectToRoute('app_cart_index');
+            return $this->redirectToRoute('app_home_page');
         }
 
         if ('' === $shippingAddress || '' === $billingAddress) {
