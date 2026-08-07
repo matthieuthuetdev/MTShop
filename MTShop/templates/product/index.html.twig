@@ -50,9 +50,7 @@
 
             <div
                 class="col-12 col-md-6 col-xl-4 product-card"
-                role="button"
-                tabindex="0"
-                style="cursor: pointer;"
+                style="cursor: default;"
                 data-name="{{ product.name }}"
                 data-description="{{ product.description }}"
                 data-price="{{ product.price }}"
@@ -60,65 +58,95 @@
                 data-promotion="{{ product.promotion }}"
                 data-id="{{ product.id }}"
                 data-add-to-cart-url="{{ path('app_cart_add', {id: product.id}) }}"
+                data-decrease-url="{{ path('app_cart_decrease_by_product', {id: product.id}) }}"
                 data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
                 data-image-name="{{ product.imageName|default('') }}"
                 data-image-url="{{ product.imageName ? asset('uploads/products/' ~ product.imageName) : '' }}"
             >
                 <article class="h-100 bg-white border border-2 rounded-4 shadow-sm overflow-hidden" style="border-color: #0b1f3a !important;">
-                    {% if product.imageName %}
-                        <img
-                            src="{{ asset('uploads/products/' ~ product.imageName) }}"
-                            alt="{{ product.name }}"
-                            class="w-100 rounded-top"
-                            style="height: 240px; object-fit: cover; display: block;"
-                        >
-                    {% else %}
-                        <div class="w-100 bg-primary" style="height: 240px;"></div>
-                    {% endif %}
+                    <div class="js-product-modal-trigger" role="button" tabindex="0" style="cursor: pointer;">
+                        {% if product.imageName %}
+                            <img
+                                src="{{ asset('uploads/products/' ~ product.imageName) }}"
+                                alt="{{ product.name }}"
+                                class="w-100 rounded-top"
+                                style="height: 240px; object-fit: cover; display: block;"
+                            >
+                        {% else %}
+                            <div class="w-100 bg-primary" style="height: 240px;"></div>
+                        {% endif %}
+
+                        <div class="p-4 d-grid gap-3">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <h2 class="h4 fw-bold mb-0">{{ product.name }}</h2>
+
+                                {% if product.promotion > 0 %}
+                                    <span class="badge text-bg-primary rounded-pill px-3 py-2">
+                                        -{{ product.promotion }} %
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-secondary mb-0">
+                                {{ product.description }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr class="my-3 border-secondary">
 
                     <div class="p-4 d-grid gap-3">
-                        <div class="d-flex align-items-start justify-content-between gap-3">
-                            <h2 class="h4 fw-bold mb-0">{{ product.name }}</h2>
-
-                            {% if product.promotion > 0 %}
-                                <span class="badge text-bg-primary rounded-pill px-3 py-2">
-                                    -{{ product.promotion }} %
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <p class="text-secondary mb-0">
-                            {{ product.description }}
-                        </p>
-
-                        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
-                            <div>
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div class="d-flex flex-wrap align-items-center gap-3">
                                 {% if product.promotion > 0 %}
                                     <div class="fw-semibold text-decoration-line-through text-secondary">
                                         {{ product.price|number_format(0, ',', ' ') }} €
                                     </div>
-
-                                    <strong class="fs-4">
-                                        {{ discountedPrice|number_format(0, ',', ' ') }} €
-                                    </strong>
-                                {% else %}
-                                    <strong class="fs-4">
-                                        {{ product.price|number_format(0, ',', ' ') }} €
-                                    </strong>
                                 {% endif %}
+                                <strong class="fs-4">
+                                    {{ discountedPrice|number_format(0, ',', ' ') }} €
+                                </strong>
                             </div>
 
-                            <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}" data-no-modal="true">
-                                <input
-                                    type="hidden"
-                                    name="_token"
-                                    value="{{ csrf_token('cart_add_' ~ product.id) }}"
-                                >
-
-                                <button type="submit" class="btn btn-primary fw-semibold text-white" data-no-modal="true">
-                                    Ajouter au panier
-                                </button>
-                            </form>
+                            {% set currentQuantity = cartQuantities[product.id] ?? 0 %}
+                            <div class="js-cart-button-container" data-no-modal="true" data-product-id="{{ product.id }}" data-quantity="{{ currentQuantity }}" data-url="{{ path('app_cart_add', {id: product.id}) }}" data-decrease-url="{{ path('app_cart_decrease_by_product', {id: product.id}) }}" data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}">
+                                {% if currentQuantity > 0 %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-secondary js-cart-decrease"
+                                            data-product-id="{{ product.id }}"
+                                            data-url="{{ path('app_cart_decrease_by_product', {id: product.id}) }}"
+                                            data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                                            data-no-modal="true"
+                                        >
+                                            −
+                                        </button>
+                                        <span class="fw-semibold js-cart-qty" data-product-id="{{ product.id }}">{{ currentQuantity }}</span>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary js-cart-increase"
+                                            data-product-id="{{ product.id }}"
+                                            data-url="{{ path('app_cart_add', {id: product.id}) }}"
+                                            data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                                            data-no-modal="true"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary fw-semibold text-white js-cart-add"
+                                        data-product-id="{{ product.id }}"
+                                        data-url="{{ path('app_cart_add', {id: product.id}) }}"
+                                        data-csrf-token="{{ csrf_token('cart_add_' ~ product.id) }}"
+                                        data-no-modal="true"
+                                    >
+                                        Ajouter au panier
+                                    </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </article>
@@ -152,12 +180,11 @@
                                 <p class="text-secondary mb-0" id="modalProductDescription"></p>
                             </div>
 
-                            <form id="modalAddToCartForm" method="post" action="#" class="mt-auto d-flex justify-content-end">
-                                <input type="hidden" name="_token" id="modalCartToken" value="">
-                                <button type="submit" class="btn btn-primary fw-semibold text-white">
+                            <div id="modalAddToCartForm" class="mt-auto d-flex justify-content-end js-cart-form js-cart-button-container" data-product-id="" data-url="#" data-decrease-url="#" data-csrf-token="">
+                                <button type="button" id="modalAddToCartButton" class="btn btn-primary fw-semibold text-white js-cart-add" data-product-id="" data-url="#" data-csrf-token="">
                                     Ajouter au panier
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
