@@ -25,7 +25,7 @@
         {% else %}
             <div class="d-grid gap-4">
                 {% for item in items %}
-                    <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;" data-product-id="{{ item.product.id }}" data-line-price="{{ item.discountedUnitPrice|number_format(2, '.', '') }}">
                         <div class="row g-4 align-items-center">
                             <div class="col-12 col-md-4 col-lg-3">
                                 {% if item.product.imageName %}
@@ -59,29 +59,47 @@
                                                 {% endif %}
                                                 {{ item.discountedUnitPrice|number_format(2, ',', ' ') }} €
                                             </span>
-                                            <span class="text-secondary">Sous-total : {{ item.lineTotal|number_format(2, ',', ' ') }} €</span>
+                                            <span class="text-secondary">Sous-total : <span class="js-cart-line-total">{{ item.lineTotal|number_format(2, ',', ' ') }}</span> €</span>
                                         </div>
                                     </div>
 
                                     <div class="d-flex flex-column align-items-lg-end gap-3">
                                         <div class="d-flex align-items-center gap-2">
-                                            <form method="post" action="{{ path('app_cart_decrease', {id: item.cart.id}) }}">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('cart_decrease_' ~ item.cart.id) }}">
-                                                <button type="submit" class="btn btn-danger">Retirer</button>
-                                            </form>
+                                            <button
+                                                type="button"
+                                                id="cart-decrease-{{ item.product.id }}"
+                                                class="btn btn-danger js-cart-decrease"
+                                                data-product-id="{{ item.product.id }}"
+                                                data-url="{{ path('app_cart_decrease', {id: item.cart.id}) }}"
+                                                data-csrf-token="{{ csrf_token('cart_decrease_' ~ item.cart.id) }}"
+                                            >
+                                                Retirer
+                                            </button>
 
-                                            <span class="fs-5 fw-bold px-3">{{ item.quantity }}</span>
+                                            <span class="fs-5 fw-bold px-3 js-cart-qty" data-product-id="{{ item.product.id }}">{{ item.quantity }}</span>
 
-                                            <form method="post" action="{{ path('app_cart_increase', {id: item.cart.id}) }}">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('cart_increase_' ~ item.cart.id) }}">
-                                                <button type="submit" class="btn btn-primary">Ajouter</button>
-                                            </form>
+                                            <button
+                                                type="button"
+                                                id="cart-increase-{{ item.product.id }}"
+                                                class="btn btn-primary js-cart-increase"
+                                                data-product-id="{{ item.product.id }}"
+                                                data-url="{{ path('app_cart_increase', {id: item.cart.id}) }}"
+                                                data-csrf-token="{{ csrf_token('cart_increase_' ~ item.cart.id) }}"
+                                            >
+                                                Ajouter
+                                            </button>
                                         </div>
 
-                                        <form method="post" action="{{ path('app_cart_remove', {id: item.cart.id}) }}">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('cart_remove_' ~ item.cart.id) }}">
-                                            <button type="submit" class="btn btn-outline-danger">Supprimer l'article</button>
-                                        </form>
+                                        <button
+                                            type="button"
+                                            id="cart-remove-{{ item.product.id }}"
+                                            class="btn btn-outline-danger js-cart-remove"
+                                            data-product-id="{{ item.product.id }}"
+                                            data-url="{{ path('app_cart_remove', {id: item.cart.id}) }}"
+                                            data-csrf-token="{{ csrf_token('cart_remove_' ~ item.cart.id) }}"
+                                        >
+                                            Supprimer l'article
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -93,8 +111,8 @@
             <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mt-4" style="border-color: #0b1f3a !important;">
                 <div class="row g-4 align-items-end">
                     <div class="col-12 col-lg-4">
-                        <p class="fs-5 mb-2"><strong>{{ totalItems }}</strong> article(s) au total</p>
-                        <p class="fs-5 mb-0"><strong>{{ totalAmount|number_format(2, ',', ' ') }} €</strong></p>
+                        <p class="fs-5 mb-2">Total articles : <strong id="cartTotalItems">{{ totalItems }}</strong></p>
+                        <p class="fs-5 mb-0">Montant total : <strong id="cartTotalAmount">{{ totalAmount|number_format(2, ',', ' ') }}</strong> €</p>
                     </div>
 
                     <div class="col-12 col-lg-4">
