@@ -3,6 +3,14 @@
 {% block title %}Accueil | MTShop{% endblock %}
 
 {% block body %}
+<section class="container pt-4">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success border border-success fw-semibold mb-0" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</section>
+
 <section class="container py-5">
     <div class="px-4 py-5 bg-white border border-2 rounded-4 shadow-sm" style="border-color: #0b1f3a !important;">
         <h1 class="display-3 fw-bold mb-4">MTShop</h1>

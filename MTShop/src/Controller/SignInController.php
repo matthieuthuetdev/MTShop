@@ -45,6 +45,7 @@ final class SignInController extends AbstractController
                         $error = 'Adresse mail ou mot de passe incorrect.';
                     } else {
                         $tokenStorage->setToken(new PostAuthenticationToken($user, 'main', $user->getRoles()));
+                        $this->addFlash('success', 'Connexion réussie. Heureux de vous revoir sur MTShop.');
 
                         return $this->redirectToRoute('app_home_page');
                     }
