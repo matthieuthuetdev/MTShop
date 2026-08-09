@@ -21,10 +21,10 @@
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_products_index' %}active{% endif %}" href="{{ path('app_products_index') }}" data-turbo="false">Nos produits</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Nos meilleurs ventes</a>
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">Mon compte</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">Mon compte</a>
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_orders_index' or app.request.attributes.get('_route') starts with 'app_order_' %}active{% endif %}" href="{{ path('app_orders_index') }}" data-turbo="false">Mes commandes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_cart_index' %}active{% endif %}" href="{{ path('app_cart_index') }}" data-turbo="false">Mon panier</a>

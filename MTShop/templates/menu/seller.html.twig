@@ -18,6 +18,9 @@
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_seller_dashboard' %}active{% endif %}" href="{{ path('app_seller_dashboard') }}" data-turbo="false">Mes produits</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_seller_orders_index' or app.request.attributes.get('_route') == 'app_seller_order_show' %}active{% endif %}" href="{{ path('app_seller_orders_index') }}" data-turbo="false">Commandes clients</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">Mon compte</a>
                 </li>
                 <li class="nav-item">

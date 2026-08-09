@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\Product;
 use App\Entity\User;
 use DateInterval;
 use DateTimeImmutable;
@@ -17,6 +18,11 @@ use Symfony\Component\Mime\Address;
 
 final class CheckoutService
 {
+    private const NON_CANCELLABLE_STATUSES = ['shipped', 'delivered', 'cancelled'];
+    private const SELLER_SHIPPABLE_STATUSES = ['pending', 'confirmed', 'preparing'];
+    private const SELLER_DELIVERABLE_STATUSES = ['shipped'];
+    private const SELLER_CANCELLABLE_STATUSES = ['pending', 'confirmed', 'preparing', 'shipped'];
+
     public function __construct(
         private readonly MailerInterface $mailer,
         #[Autowire('%env(MAILER_FROM)%')]
@@ -135,6 +141,7 @@ final class CheckoutService
 
         foreach ($items as $item) {
             $product = $item['product'];
+            $product->setOrderCount((int) $product->getOrderCount() + (int) $item['quantity']);
             $orderItem = new OrderItem();
             $orderItem->setProduct($product);
             $orderItem->setQuantity((int) $item['quantity']);
@@ -177,6 +184,126 @@ final class CheckoutService
             'next_day' => $createdAt->modify('+1 day')->format('d/m/Y'),
             default => $this->buildBusinessDaysEstimate($createdAt, 3, 4),
         };
+    }
+
+    public function getOrderStatusLabel(?string $status): string
+    {
+        return match ($status) {
+            'pending' => 'En attente',
+            'confirmed' => 'Confirmée',
+            'preparing' => 'En préparation',
+            'shipped' => 'Expédiée',
+            'delivered' => 'Livrée',
+            'cancelled' => 'Annulée',
+            default => 'Inconnue',
+        };
+    }
+
+    public function canCancelOrder(Order $order): bool
+    {
+        return !in_array($order->getStatus(), self::NON_CANCELLABLE_STATUSES, true);
+    }
+
+    public function canRequestRefund(Order $order): bool
+    {
+        return 'delivered' === $order->getStatus();
+    }
+
+    public function canSellerMarkAsShipped(Order $order): bool
+    {
+        return in_array($order->getStatus(), self::SELLER_SHIPPABLE_STATUSES, true);
+    }
+
+    public function canSellerMarkAsDelivered(Order $order): bool
+    {
+        return in_array($order->getStatus(), self::SELLER_DELIVERABLE_STATUSES, true);
+    }
+
+    public function canSellerMarkAsCancelled(Order $order): bool
+    {
+        return in_array($order->getStatus(), self::SELLER_CANCELLABLE_STATUSES, true);
+    }
+
+    public function isProductAvailableForReorder(?Product $product): bool
+    {
+        if (!$product instanceof Product) {
+            return false;
+        }
+
+        return $product->isActive() === true && (int) $product->getStock() > 0;
+    }
+
+    /**
+     * @return array<int, array{product: Product, quantity: int, reason: string}>
+     */
+    public function buildRefundSelection(Order $order, array $selectedItems, array $reasons): array
+    {
+        $selection = [];
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $itemId = (string) $orderItem->getId();
+            if (!array_key_exists($itemId, $selectedItems)) {
+                continue;
+            }
+
+            $reason = trim((string) ($reasons[$itemId] ?? ''));
+            $product = $orderItem->getProduct();
+
+            if (!$product instanceof Product || '' === $reason) {
+                continue;
+            }
+
+            $selection[] = [
+                'product' => $product,
+                'quantity' => (int) $orderItem->getQuantity(),
+                'reason' => $reason,
+            ];
+        }
+
+        return $selection;
+    }
+
+    /**
+     * @param array<int, array{product: Product, quantity: int, reason: string}> $selectedItems
+     */
+    public function sendRefundRequestNotification(Order $order, array $selectedItems): void
+    {
+        $recipient = $this->extractRecipientAddress($this->mailerFrom);
+        $customer = $order->getCustomer();
+        $email = (new TemplatedEmail())
+            ->from($this->mailerFrom)
+            ->to($recipient)
+            ->subject(sprintf('Demande de remboursement MTShop pour la commande #%d', $order->getId()))
+            ->htmlTemplate('mail/refund_request.html.twig')
+            ->context([
+                'order' => $order,
+                'customer' => $customer,
+                'selectedItems' => $selectedItems,
+            ]);
+
+        $this->mailer->send($email);
+    }
+
+    public function sendOrderStatusUpdateToCustomer(Order $order, ?string $reason = null): void
+    {
+        $customer = $order->getCustomer();
+        if (!$customer instanceof User || null === $customer->getEmail()) {
+            return;
+        }
+
+        $email = (new TemplatedEmail())
+            ->from($this->mailerFrom)
+            ->to(new Address($customer->getEmail(), trim(sprintf('%s %s', (string) $customer->getFirstName(), (string) $customer->getLastName()))))
+            ->subject(sprintf('Mise à jour de votre commande MTShop #%d', $order->getId()))
+            ->htmlTemplate('mail/order_status_update.html.twig')
+            ->context([
+                'order' => $order,
+                'customer' => $customer,
+                'statusLabel' => $this->getOrderStatusLabel($order->getStatus()),
+                'reason' => $reason,
+            ]);
+
+        $this->mailer->send($email);
     }
 
     private function extractRecipientAddress(string $value): Address

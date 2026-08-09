@@ -1,0 +1,60 @@
+<div class="d-flex flex-column align-items-stretch gap-3">
+    {% if showDetailLink|default(false) %}
+        <a href="{{ path('app_seller_order_show', {id: order.id}) }}" class="btn btn-outline-primary btn-lg fw-semibold">Voir le détail</a>
+    {% endif %}
+
+    <button
+        type="button"
+        class="btn btn-outline-primary btn-lg fw-semibold"
+        data-bs-toggle="modal"
+        data-bs-target="#sellerOrderStatusModal"
+        data-order-id="{{ order.id }}"
+        data-order-number="#{{ order.id }}"
+        data-order-status-label="Expédiée"
+        data-order-action="{{ path('app_seller_order_update_status', {id: order.id}) }}"
+        data-order-token="{{ csrf_token('seller_order_status_' ~ order.id) }}"
+        data-order-next-status="shipped"
+        data-order-reason-required="0"
+        data-order-redirect="{{ redirectPath }}"
+        {% if not canShip %}disabled{% endif %}
+    >
+        Marquer comme expédiée
+    </button>
+
+    {% if canDeliver %}
+        <button
+            type="button"
+            class="btn btn-primary btn-lg fw-semibold"
+            data-bs-toggle="modal"
+            data-bs-target="#sellerOrderStatusModal"
+            data-order-id="{{ order.id }}"
+            data-order-number="#{{ order.id }}"
+            data-order-status-label="Livrée"
+            data-order-action="{{ path('app_seller_order_update_status', {id: order.id}) }}"
+            data-order-token="{{ csrf_token('seller_order_status_' ~ order.id) }}"
+            data-order-next-status="delivered"
+            data-order-reason-required="0"
+            data-order-redirect="{{ redirectPath }}"
+        >
+            Marquer comme livrée
+        </button>
+    {% endif %}
+
+    <button
+        type="button"
+        class="btn btn-outline-danger btn-lg fw-semibold"
+        data-bs-toggle="modal"
+        data-bs-target="#sellerOrderStatusModal"
+        data-order-id="{{ order.id }}"
+        data-order-number="#{{ order.id }}"
+        data-order-status-label="Annulée"
+        data-order-action="{{ path('app_seller_order_update_status', {id: order.id}) }}"
+        data-order-token="{{ csrf_token('seller_order_status_' ~ order.id) }}"
+        data-order-next-status="cancelled"
+        data-order-reason-required="1"
+        data-order-redirect="{{ redirectPath }}"
+        {% if not canCancel %}disabled{% endif %}
+    >
+        Marquer comme annulée
+    </button>
+</div>

@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de commande | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">Commande #{{ order.id }}</h1>
+                <p class="fs-5 text-secondary mb-0">Consultez les articles, le statut et les informations de livraison et de facturation.</p>
+            </div>
+            <a href="{{ path('app_orders_index') }}" class="btn btn-outline-primary btn-lg fw-semibold">Retour à mes commandes</a>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <div class="text-secondary small mb-2">Statut</div>
+                    <div class="fw-bold fs-5">{{ statusLabel }}</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <div class="text-secondary small mb-2">Montant total</div>
+                    <div class="fw-bold fs-5">{{ order.totalAmount|number_format(2, ',', ' ') }} €</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <div class="text-secondary small mb-2">Nombre d'articles</div>
+                    <div class="fw-bold fs-5">{{ totalItems }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-4 border border-2 bg-white p-4 shadow-sm mb-4" style="border-color: #0b1f3a !important;">
+            <div class="text-secondary small mb-2">Date de commande</div>
+            <div class="fw-bold">{{ order.createdAt ? order.createdAt|date('d/m/Y') : '—' }}</div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-xl-7">
+                <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                    <h2 class="h4 fw-bold mb-4">Articles commandés</h2>
+
+                    {% if orderItems is empty %}
+                        <p class="text-secondary mb-0">Aucun article dans cette commande.</p>
+                    {% else %}
+                        <div class="d-grid gap-3">
+                            {% for item in orderItems %}
+                                <article class="rounded-4 border border-2 p-4" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                                        <div>
+                                            <h3 class="h5 fw-bold mb-2">{{ item.product ? item.product.name : 'Produit indisponible' }}</h3>
+                                            <p class="text-secondary mb-0">{{ item.quantity }} × {{ item.unitPrice|number_format(2, ',', ' ') }} €</p>
+                                        </div>
+                                        <div class="fw-bold fs-5">{{ item.lineTotal|number_format(2, ',', ' ') }} €</div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-5">
+                <div class="d-grid gap-4">
+                    <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <h2 class="h4 fw-bold mb-3">Livraison</h2>
+                        <p class="mb-2"><strong>Mode :</strong> {{ order.deliveryMethod ?: '—' }}</p>
+                        <p class="mb-2"><strong>Frais :</strong> {{ order.deliveryFee|number_format(2, ',', ' ') }} €</p>
+                        <p class="mb-0"><strong>Estimation :</strong> {{ deliveryDateText }}</p>
+                    </div>
+
+                    <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <h2 class="h4 fw-bold mb-3">Adresse de livraison</h2>
+                        <p class="mb-0">{{ order.shippingAddress ? order.shippingAddress|nl2br : 'Non renseignée' }}</p>
+                    </div>
+
+                    <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <h2 class="h4 fw-bold mb-3">Adresse de facturation</h2>
+                        <p class="mb-0">{{ order.billingAddress ? order.billingAddress|nl2br : 'Non renseignée' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

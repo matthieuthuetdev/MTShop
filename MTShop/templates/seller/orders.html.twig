@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commandes clients | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="display-5 fw-bold mb-2">Commandes clients</h1>
+            <p class="fs-5 text-secondary mb-0">Traitez les commandes passées par les acheteurs et mettez leur statut à jour.</p>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} mb-4" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if orderCards is empty %}
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                <p class="fs-5 text-secondary mb-0">Aucune commande client pour le moment.</p>
+            </div>
+        {% else %}
+            <div class="d-grid gap-4">
+                {% for card in orderCards %}
+                    {% set order = card.order %}
+                    <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <div class="d-flex flex-column flex-xl-row justify-content-between gap-4">
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                                    <h2 class="h4 fw-bold mb-0">Commande #{{ order.id }}</h2>
+                                    <span class="badge rounded-pill text-bg-primary px-3 py-2">{{ card.statusLabel }}</span>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Client</div>
+                                            <div class="fw-bold">{{ order.customer.firstName }} {{ order.customer.lastName }}</div>
+                                            <div class="text-secondary">{{ order.customer.email }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Montant total</div>
+                                            <div class="fw-bold fs-5">{{ order.totalAmount|number_format(2, ',', ' ') }} €</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Nombre d'articles</div>
+                                            <div class="fw-bold fs-5">{{ card.totalItems }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-4 border border-2 p-3" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                    <div class="text-secondary small mb-1">Date de commande</div>
+                                    <div class="fw-bold">{{ order.createdAt ? order.createdAt|date('d/m/Y') : '—' }}</div>
+                                </div>
+                            </div>
+
+                            <div style="min-width: 300px;">
+                                {% include 'seller/_order_status_buttons.html.twig' with {
+                                    order: order,
+                                    canShip: card.canShip,
+                                    canDeliver: card.canDeliver,
+                                    canCancel: card.canCancel,
+                                    redirectPath: redirectPath,
+                                    showDetailLink: true
+                                } only %}
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% include 'seller/_order_status_modal.html.twig' %}
+{% endblock %}
