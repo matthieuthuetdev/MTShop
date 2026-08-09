@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Seller dashboard | MTShop{% endblock %}
+{% block title %}Tableau de bord vendeur | MTShop{% endblock %}
 
 {% block body %}
 <section class="container py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
         <div>
             <h1 class="display-5 fw-bold mb-2">Mes produits</h1>
-            <p class="fs-5 text-secondary mb-0">Gérez vos produits et vos stocks depuis votre dashboard vendeur.</p>
+            <p class="fs-5 text-secondary mb-0">Gérez vos produits et vos stocks depuis votre tableau de bord vendeur.</p>
         </div>
         <button type="button" class="btn btn-primary btn-lg fw-semibold" data-bs-toggle="modal" data-bs-target="#productNewModal" data-action="new">Ajouter un produit</button>
     </div>
@@ -17,52 +17,53 @@
             <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="w-25">Produit</th>
-                            <th>Prix</th>
-                            <th>Stock</th>
-                            <th>Catégorie</th>
-                            <th>Statut</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in products %}
+                        <thead class="table-light">
                             <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-4 overflow-hidden" style="width: 96px; height: 96px;">
-                                            {% if product.imageName %}
-                                                <img src="{{ asset('uploads/products/' ~ product.imageName) }}" alt="{{ product.name }}" class="img-fluid h-100 w-100" style="object-fit: cover;">
-                                            {% else %}
-                                                <div class="bg-secondary bg-opacity-10 w-100 h-100 d-flex align-items-center justify-content-center text-secondary small">
-                                                    Aucune image
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ product.name }}</div>
-                                            <div class="text-secondary">{{ product.description|slice(0, 70) ~ (product.description|length > 70 ? '…' : '') }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ product.price / 100 | number_format(2, ',', ' ') }} €</td>
-                                <td>{{ product.stock }}</td>
-                                <td>{{ product.category ?: '—' }}</td>
-                                <td>{{ product.isActive ? 'Actif' : 'Inactif' }}</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#productEditModal-{{ product.id }}">Modifier</button>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="{{ product.id }}" data-delete-token="{{ csrf_token('delete_product_' ~ product.id) }}" data-product-name="{{ product.name }}">Supprimer</button>
-                                </td>
+                                <th class="w-25">Produit</th>
+                                <th>Prix</th>
+                                <th>Stock</th>
+                                <th>Catégorie</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
                             </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center text-secondary">Aucun produit trouvé.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-4 overflow-hidden" style="width: 96px; height: 96px;">
+                                                {% if product.imageName %}
+                                                    <img src="{{ asset('uploads/products/' ~ product.imageName) }}" alt="{{ product.name }}" class="img-fluid h-100 w-100" style="object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-secondary bg-opacity-10 w-100 h-100 d-flex align-items-center justify-content-center text-secondary small">
+                                                        Aucune image
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ product.name }}</div>
+                                                <div class="text-secondary">{{ product.description|slice(0, 70) ~ (product.description|length > 70 ? '…' : '') }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ (product.price / 100)|number_format(2, ',', ' ') }} €</td>
+                                    <td>{{ product.stock }}</td>
+                                    <td>{{ product.category ?: '—' }}</td>
+                                    <td>{{ product.isActive ? 'Actif' : 'Inactif' }}</td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#productEditModal-{{ product.id }}">Modifier</button>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="{{ product.id }}" data-delete-token="{{ csrf_token('delete_product_' ~ product.id) }}" data-product-name="{{ product.name }}">Supprimer</button>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-secondary">Aucun produit trouvé.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
