@@ -1,0 +1,95 @@
+<div class="modal fade" id="sellerOrderStatusModal" tabindex="-1" aria-labelledby="sellerOrderStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h5 fw-bold mb-0" id="sellerOrderStatusModalLabel">Confirmer la mise à jour</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="mb-3">Vous allez mettre à jour la commande <strong id="sellerOrderNumber"></strong> en statut <strong id="sellerOrderNextStatus"></strong>.</p>
+
+                <div id="sellerOrderReasonWrapper" class="d-none">
+                    <label for="sellerOrderReason" class="form-label fw-semibold">Raison de l'annulation</label>
+                    <textarea
+                        id="sellerOrderReason"
+                        name="reason"
+                        class="form-control rounded-4 border border-2 shadow-sm"
+                        style="border-color: rgba(11, 31, 58, 0.16) !important; min-height: 120px;"
+                        placeholder="Expliquez pourquoi cette commande est annulée."
+                        form="sellerOrderStatusForm"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Retour</button>
+                <form id="sellerOrderStatusForm" method="post" action="">
+                    <input type="hidden" name="_token" id="sellerOrderStatusToken" value="">
+                    <input type="hidden" name="status" id="sellerOrderStatusValue" value="">
+                    <input type="hidden" name="redirect_to" id="sellerOrderRedirectTo" value="">
+                    <button type="submit" class="btn btn-primary">Confirmer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('sellerOrderStatusModal');
+        if (!modal) {
+            return;
+        }
+
+        modal.addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
+
+            const form = document.getElementById('sellerOrderStatusForm');
+            const token = document.getElementById('sellerOrderStatusToken');
+            const status = document.getElementById('sellerOrderStatusValue');
+            const redirectTo = document.getElementById('sellerOrderRedirectTo');
+            const orderNumber = document.getElementById('sellerOrderNumber');
+            const nextStatus = document.getElementById('sellerOrderNextStatus');
+            const reasonWrapper = document.getElementById('sellerOrderReasonWrapper');
+            const reasonField = document.getElementById('sellerOrderReason');
+            const reasonRequired = trigger.getAttribute('data-order-reason-required') === '1';
+
+            if (form) {
+                form.action = trigger.getAttribute('data-order-action') || '';
+            }
+
+            if (token) {
+                token.value = trigger.getAttribute('data-order-token') || '';
+            }
+
+            if (status) {
+                status.value = trigger.getAttribute('data-order-next-status') || '';
+            }
+
+            if (redirectTo) {
+                redirectTo.value = trigger.getAttribute('data-order-redirect') || '';
+            }
+
+            if (orderNumber) {
+                orderNumber.textContent = trigger.getAttribute('data-order-number') || '';
+            }
+
+            if (nextStatus) {
+                nextStatus.textContent = trigger.getAttribute('data-order-status-label') || '';
+            }
+
+            if (reasonWrapper) {
+                reasonWrapper.classList.toggle('d-none', !reasonRequired);
+            }
+
+            if (reasonField) {
+                reasonField.required = reasonRequired;
+                if (!reasonRequired) {
+                    reasonField.value = '';
+                }
+            }
+        });
+    });
+</script>

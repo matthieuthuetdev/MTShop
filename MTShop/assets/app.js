@@ -35,6 +35,8 @@ function initProductPage() {
                     return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
                 case 'priceDesc':
                     return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                case 'bestSellers':
+                    return (parseInt(b.dataset.orderCount || '0', 10) || 0) - (parseInt(a.dataset.orderCount || '0', 10) || 0);
                 case 'az':
                 default:
                     return a.dataset.name.localeCompare(b.dataset.name);

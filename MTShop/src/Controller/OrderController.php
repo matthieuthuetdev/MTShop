@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Repository\CartRepository;
@@ -19,6 +20,75 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class OrderController extends AbstractController
 {
+    #[Route('/my-orders/{id}', name: 'app_order_show', methods: ['GET'])]
+    public function show(Order $order, CheckoutService $checkoutService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $orderItems = [];
+        $totalItems = 0;
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $orderItems[] = [
+                'orderItem' => $orderItem,
+                'product' => $orderItem->getProduct(),
+                'quantity' => (int) $orderItem->getQuantity(),
+                'unitPrice' => (float) $orderItem->getUnitPrice(),
+                'lineTotal' => (float) $orderItem->getTotalPrice(),
+            ];
+            $totalItems += (int) $orderItem->getQuantity();
+        }
+
+        return $this->render('order/show.html.twig', [
+            'order' => $order,
+            'orderItems' => $orderItems,
+            'totalItems' => $totalItems,
+            'statusLabel' => $checkoutService->getOrderStatusLabel($order->getStatus()),
+            'deliveryDateText' => $checkoutService->getDeliveryDateText($order),
+        ]);
+    }
+
+    #[Route('/my-orders', name: 'app_orders_index', methods: ['GET'])]
+    public function index(OrderRepository $orderRepository, CheckoutService $checkoutService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $orders = $orderRepository->findBy(['customer' => $user], ['createdAt' => 'DESC', 'id' => 'DESC']);
+        $orderCards = [];
+
+        foreach ($orders as $order) {
+            $totalItems = 0;
+            $availableReorderItems = 0;
+
+            foreach ($order->getOrderItems() as $orderItem) {
+                $totalItems += (int) $orderItem->getQuantity();
+
+                if ($checkoutService->isProductAvailableForReorder($orderItem->getProduct())) {
+                    ++$availableReorderItems;
+                }
+            }
+
+            $orderCards[] = [
+                'order' => $order,
+                'totalItems' => $totalItems,
+                'statusLabel' => $checkoutService->getOrderStatusLabel($order->getStatus()),
+                'canCancel' => $checkoutService->canCancelOrder($order),
+                'canRefund' => $checkoutService->canRequestRefund($order),
+                'canReorder' => $availableReorderItems > 0,
+            ];
+        }
+
+        return $this->render('order/index.html.twig', [
+            'orderCards' => $orderCards,
+        ]);
+    }
+
     #[Route('/checkout', name: 'app_checkout_summary', methods: ['GET'])]
     public function summary(CartRepository $cartRepository, CheckoutService $checkoutService): Response
     {
@@ -131,6 +201,181 @@ final class OrderController extends AbstractController
             'order' => $order,
             'deliveryDateText' => $deliveryDateText,
             'deliveryOption' => $deliveryOption,
+        ]);
+    }
+
+    #[Route('/my-orders/{id}/cancel', name: 'app_order_cancel', methods: ['POST'])]
+    public function cancel(Order $order, Request $request, EntityManagerInterface $entityManager, CheckoutService $checkoutService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$this->isCsrfTokenValid('cancel_order_'.$order->getId(), (string) $request->request->get('_token', ''))) {
+            $this->addFlash('danger', 'Votre demande n\'a pas pu être vérifiée.');
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        if (!$checkoutService->canCancelOrder($order)) {
+            $this->addFlash('warning', 'Cette commande ne peut plus être annulée.');
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        $order->setStatus('cancelled');
+        $entityManager->flush();
+
+        $this->addFlash('success', sprintf('La commande #%d a bien été annulée.', $order->getId()));
+
+        return $this->redirectToRoute('app_orders_index');
+    }
+
+    #[Route('/my-orders/{id}/reorder', name: 'app_order_reorder', methods: ['POST'])]
+    public function reorder(
+        Order $order,
+        Request $request,
+        CartRepository $cartRepository,
+        EntityManagerInterface $entityManager,
+        CheckoutService $checkoutService,
+    ): Response {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$this->isCsrfTokenValid('reorder_order_'.$order->getId(), (string) $request->request->get('_token', ''))) {
+            $this->addFlash('danger', 'Votre demande n\'a pas pu être vérifiée.');
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        $addedCount = 0;
+        $skippedProducts = [];
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $product = $orderItem->getProduct();
+
+            if (!$checkoutService->isProductAvailableForReorder($product)) {
+                if (null !== $product?->getName()) {
+                    $skippedProducts[] = $product->getName();
+                }
+                continue;
+            }
+
+            $existingCart = $cartRepository->findOneBy([
+                'customer' => $user,
+                'product' => $product,
+            ]);
+
+            $existingQuantity = $existingCart?->getQuantity() ?? 0;
+            $availableStock = max(0, (int) $product->getStock() - $existingQuantity);
+            if ($availableStock <= 0) {
+                $skippedProducts[] = (string) $product->getName();
+                continue;
+            }
+
+            $quantityToAdd = min((int) $orderItem->getQuantity(), $availableStock);
+            if ($quantityToAdd <= 0) {
+                $skippedProducts[] = (string) $product->getName();
+                continue;
+            }
+
+            $cart = $existingCart ?? new Cart();
+            if (!$existingCart instanceof Cart) {
+                $cart->setCustomer($user);
+                $cart->setProduct($product);
+                $cart->setQuantity(0);
+                $entityManager->persist($cart);
+            }
+
+            $cart->setQuantity((int) $cart->getQuantity() + $quantityToAdd);
+            $addedCount += $quantityToAdd;
+        }
+
+        if ($addedCount > 0) {
+            $entityManager->flush();
+        }
+
+        if ($addedCount <= 0) {
+            $this->addFlash('warning', 'Aucun article de cette commande n\'est encore disponible dans la boutique.');
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        if ([] !== $skippedProducts) {
+            $this->addFlash('warning', 'Certains articles n\'ont pas pu être ajoutés car ils ne sont plus disponibles.');
+        }
+
+        $this->addFlash('success', 'Les articles disponibles ont été ajoutés à votre panier.');
+
+        return $this->redirectToRoute('app_cart_index');
+    }
+
+    #[Route('/my-orders/{id}/refund', name: 'app_order_refund', methods: ['GET', 'POST'])]
+    public function refund(Order $order, Request $request, CheckoutService $checkoutService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$checkoutService->canRequestRefund($order)) {
+            $this->addFlash('warning', 'Le remboursement n\'est disponible que pour les commandes livrées.');
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('refund_order_'.$order->getId(), (string) $request->request->get('_token', ''))) {
+                $this->addFlash('danger', 'Votre demande n\'a pas pu être vérifiée.');
+
+                return $this->redirectToRoute('app_order_refund', ['id' => $order->getId()]);
+            }
+
+            $selectedItems = $checkoutService->buildRefundSelection(
+                $order,
+                (array) $request->request->all('items'),
+                (array) $request->request->all('reasons'),
+            );
+
+            if ([] === $selectedItems) {
+                $this->addFlash('warning', 'Sélectionnez au moins un article et renseignez une raison pour chaque article choisi.');
+
+                return $this->redirectToRoute('app_order_refund', ['id' => $order->getId()]);
+            }
+
+            try {
+                $checkoutService->sendRefundRequestNotification($order, $selectedItems);
+                $this->addFlash('success', 'Votre demande de remboursement a bien été envoyée.');
+            } catch (\Throwable $exception) {
+                $this->addFlash('danger', 'La demande n\'a pas pu être envoyée pour le moment.');
+
+                return $this->redirectToRoute('app_order_refund', ['id' => $order->getId()]);
+            }
+
+            return $this->redirectToRoute('app_orders_index');
+        }
+
+        $refundItems = [];
+        $totalItems = 0;
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $totalItems += (int) $orderItem->getQuantity();
+            $refundItems[] = [
+                'orderItem' => $orderItem,
+                'product' => $orderItem->getProduct(),
+                'quantity' => (int) $orderItem->getQuantity(),
+                'lineTotal' => (float) $orderItem->getTotalPrice(),
+            ];
+        }
+
+        return $this->render('order/refund.html.twig', [
+            'order' => $order,
+            'refundItems' => $refundItems,
+            'totalItems' => $totalItems,
+            'statusLabel' => $checkoutService->getOrderStatusLabel($order->getStatus()),
         ]);
     }
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Demande de remboursement MTShop</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f5f7fb; font-family:Arial, Helvetica, sans-serif; color:#0b1f3a;">
+    <div style="max-width:720px; margin:0 auto; padding:32px 16px;">
+        <div style="background-color:#ffffff; border:2px solid #0b1f3a; border-radius:20px; padding:32px;">
+            <h1 style="margin:0 0 20px 0; font-size:28px;">Demande de remboursement MTShop</h1>
+
+            <p style="margin:0 0 12px 0;">Un utilisateur souhaite demander un remboursement pour la commande #{{ order.id }}.</p>
+
+            <h2 style="margin:24px 0 12px 0; font-size:20px;">Client</h2>
+            <p style="margin:0 0 6px 0;">Nom : {{ customer.firstName }} {{ customer.lastName }}</p>
+            <p style="margin:0 0 6px 0;">Adresse mail : {{ customer.email }}</p>
+
+            <h2 style="margin:24px 0 12px 0; font-size:20px;">Commande</h2>
+            <p style="margin:0 0 6px 0;">Numéro : #{{ order.id }}</p>
+            <p style="margin:0 0 6px 0;">Date : {{ order.createdAt ? order.createdAt|date('d/m/Y') : '—' }}</p>
+            <p style="margin:0 0 6px 0;">Montant total : {{ order.totalAmount|number_format(2, ',', ' ') }} €</p>
+
+            <h2 style="margin:24px 0 12px 0; font-size:20px;">Articles concernés</h2>
+            <ul style="margin:0; padding-left:20px;">
+                {% for item in selectedItems %}
+                    <li style="margin-bottom:12px;">
+                        <strong>{{ item.product.name }}</strong><br>
+                        Quantité : {{ item.quantity }}<br>
+                        Raison : {{ item.reason }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

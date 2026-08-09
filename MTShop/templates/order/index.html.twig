@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes commandes | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="display-5 fw-bold mb-2">Mes commandes</h1>
+            <p class="fs-5 text-secondary mb-0">Retrouvez l'historique de vos commandes et les actions disponibles.</p>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} mb-4" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {% if orderCards is empty %}
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                <p class="fs-5 text-secondary mb-0">Aucune commande.</p>
+            </div>
+        {% else %}
+            <div class="d-grid gap-4">
+                {% for card in orderCards %}
+                    {% set order = card.order %}
+                    <article class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+                        <div class="d-flex flex-column flex-xl-row justify-content-between gap-4">
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                                    <h2 class="h4 fw-bold mb-0">Commande #{{ order.id }}</h2>
+                                    <span class="badge rounded-pill text-bg-primary px-3 py-2">{{ card.statusLabel }}</span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Montant total</div>
+                                            <div class="fw-bold fs-5">{{ order.totalAmount|number_format(2, ',', ' ') }} €</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Nombre d'articles</div>
+                                            <div class="fw-bold fs-5">{{ card.totalItems }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="rounded-4 border border-2 p-3 h-100" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                                            <div class="text-secondary small mb-1">Date</div>
+                                            <div class="fw-bold">{{ order.createdAt ? order.createdAt|date('d/m/Y') : '—' }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column justify-content-center align-items-stretch gap-3" style="min-width: 260px;">
+                                <a href="{{ path('app_order_show', {id: order.id}) }}" class="btn btn-outline-primary btn-lg fw-semibold">Voir le détail</a>
+
+                                <form method="post" action="{{ path('app_order_reorder', {id: order.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('reorder_order_' ~ order.id) }}">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold" {% if not card.canReorder %}disabled{% endif %}>Commander à nouveau</button>
+                                </form>
+
+                                {% if card.canCancel %}
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-danger btn-lg fw-semibold"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#cancelOrderModal"
+                                        data-order-id="{{ order.id }}"
+                                        data-order-number="#{{ order.id }}"
+                                        data-order-action="{{ path('app_order_cancel', {id: order.id}) }}"
+                                        data-order-token="{{ csrf_token('cancel_order_' ~ order.id) }}"
+                                    >
+                                        Annuler la commande
+                                    </button>
+                                {% elseif card.canRefund %}
+                                    <a href="{{ path('app_order_refund', {id: order.id}) }}" class="btn btn-outline-primary btn-lg fw-semibold">Demander un remboursement</a>
+                                {% else %}
+                                    <button type="button" class="btn btn-outline-secondary btn-lg fw-semibold" disabled>Aucune action disponible</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
+            <div class="modal-header border-0">
+                <h2 class="modal-title h5 fw-bold mb-0" id="cancelOrderModalLabel">Confirmer l'annulation</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="mb-0">Voulez-vous vraiment annuler la commande <strong id="cancelOrderNumber"></strong> ?</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Retour</button>
+                <form id="cancelOrderForm" method="post" action="">
+                    <input type="hidden" name="_token" id="cancelOrderToken" value="">
+                    <button type="submit" class="btn btn-danger">Confirmer l'annulation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cancelOrderModal = document.getElementById('cancelOrderModal');
+        if (!cancelOrderModal) {
+            return;
+        }
+
+        cancelOrderModal.addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
+
+            const form = document.getElementById('cancelOrderForm');
+            const token = document.getElementById('cancelOrderToken');
+            const orderNumber = document.getElementById('cancelOrderNumber');
+
+            if (form) {
+                form.action = trigger.getAttribute('data-order-action') || '';
+            }
+
+            if (token) {
+                token.value = trigger.getAttribute('data-order-token') || '';
+            }
+
+            if (orderNumber) {
+                orderNumber.textContent = trigger.getAttribute('data-order-number') || '';
+            }
+        });
+    });
+</script>
+{% endblock %}
