@@ -38,6 +38,7 @@
                         <option value="za">Z - A</option>
                         <option value="priceAsc">Prix croissant</option>
                         <option value="priceDesc">Prix décroissant</option>
+                        <option value="bestSellers">Les plus vendus</option>
                     </select>
                 </div>
             </div>
@@ -54,6 +55,7 @@
                 data-name="{{ product.name }}"
                 data-description="{{ product.description }}"
                 data-price="{{ product.price }}"
+                data-order-count="{{ product.orderCount }}"
                 data-discounted-price="{{ discountedPrice }}"
                 data-promotion="{{ product.promotion }}"
                 data-id="{{ product.id }}"
