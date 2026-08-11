@@ -10,11 +10,14 @@ use App\Entity\User;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
 use App\Service\CheckoutService;
+use App\Service\StripeCheckoutService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_USER')]
@@ -59,7 +62,7 @@ final class OrderController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $orders = $orderRepository->findBy(['customer' => $user], ['createdAt' => 'DESC', 'id' => 'DESC']);
+        $orders = $orderRepository->findVisibleOrdersForCustomer($user);
         $orderCards = [];
 
         foreach ($orders as $order) {
@@ -78,7 +81,7 @@ final class OrderController extends AbstractController
                 'order' => $order,
                 'totalItems' => $totalItems,
                 'statusLabel' => $checkoutService->getOrderStatusLabel($order->getStatus()),
-                'canCancel' => $checkoutService->canCancelOrder($order),
+                'canCancel' => 'paid' === $order->getPaymentStatus() && $checkoutService->canCancelOrder($order),
                 'canRefund' => $checkoutService->canRequestRefund($order),
                 'canReorder' => $availableReorderItems > 0,
             ];
@@ -99,7 +102,7 @@ final class OrderController extends AbstractController
 
         $carts = $cartRepository->findBy(['customer' => $user], ['id' => 'DESC']);
         $summary = $checkoutService->summarizeCart($carts);
-        if (empty($summary['items'])) {
+        if ([] === $summary['items']) {
             return $this->redirectToRoute('app_home_page');
         }
 
@@ -125,6 +128,8 @@ final class OrderController extends AbstractController
         CartRepository $cartRepository,
         EntityManagerInterface $entityManager,
         CheckoutService $checkoutService,
+        StripeCheckoutService $stripeCheckoutService,
+        LoggerInterface $logger,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -132,7 +137,7 @@ final class OrderController extends AbstractController
         }
 
         if (!$this->isCsrfTokenValid('checkout_place', (string) $request->request->get('_token', ''))) {
-            $this->addFlash('danger', 'Votre demande n’a pas pu être vérifiée.');
+            $this->addFlash('danger', 'Votre demande n\'a pas pu être vérifiée.');
 
             return $this->redirectToRoute('app_checkout_summary');
         }
@@ -142,7 +147,7 @@ final class OrderController extends AbstractController
         $shippingAddress = trim((string) $user->getShippingAddress());
         $billingAddress = trim((string) $user->getBillingAddress());
 
-        if (empty($summary['items'])) {
+        if ([] === $summary['items']) {
             return $this->redirectToRoute('app_home_page');
         }
 
@@ -156,32 +161,78 @@ final class OrderController extends AbstractController
         $deliveryOption = $checkoutService->resolveDeliveryOption($deliveryCode, $summary['subtotal']);
 
         if (null === $deliveryOption) {
-            $this->addFlash('danger', 'L’offre de livraison sélectionnée est invalide.');
+            $this->addFlash('danger', 'L\'offre de livraison sélectionnée est invalide.');
 
             return $this->redirectToRoute('app_checkout_summary');
         }
 
         if (false === $deliveryOption['available']) {
-            $this->addFlash('danger', 'Cette offre de livraison n’est pas disponible maintenant.');
+            $this->addFlash('danger', 'Cette offre de livraison n\'est pas disponible maintenant.');
 
             return $this->redirectToRoute('app_checkout_summary');
         }
 
-        $order = $checkoutService->createOrder($user, $summary['items'], $summary['subtotal'], $deliveryOption);
+        $order = $checkoutService->createPendingOrder($user, $summary['items'], $summary['subtotal'], $deliveryOption);
         $entityManager->persist($order);
-
-        foreach ($summary['items'] as $item) {
-            $entityManager->remove($item['cart']);
-        }
-
         $entityManager->flush();
+
         try {
-            $checkoutService->sendOrderNotification($order, $summary, $deliveryOption);
+            $successUrl = $this->generateUrl('app_checkout_success', ['id' => $order->getId()], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = $this->generateUrl('app_checkout_cancel', ['id' => $order->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+            $session = $stripeCheckoutService->createCheckoutSession($order, $successUrl, $cancelUrl);
+            $order->setStripeCheckoutSessionId((string) $session->id);
+            $entityManager->flush();
+
+            return $this->redirect((string) $session->url, Response::HTTP_SEE_OTHER);
         } catch (\Throwable $exception) {
-            $this->addFlash('warning', 'La commande est enregistrée, mais l’e-mail de notification n’a pas pu être envoyé.');
+            $logger->error('Stripe Checkout session creation failed.', [
+                'order_id' => $order->getId(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            $entityManager->remove($order);
+            $entityManager->flush();
+
+            $this->addFlash('danger', 'Le paiement n\'a pas pu être initialisé pour le moment. Veuillez réessayer.');
+
+            return $this->redirectToRoute('app_checkout_summary');
+        }
+    }
+
+    #[Route('/checkout/success/{id}', name: 'app_checkout_success', methods: ['GET'])]
+    public function success(Order $order): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
         }
 
-        return $this->redirectToRoute('app_order_confirmation', ['id' => $order->getId()]);
+        return $this->render('order/success.html.twig', [
+            'order' => $order,
+            'isPaymentConfirmed' => 'paid' === $order->getPaymentStatus(),
+        ]);
+    }
+
+    #[Route('/checkout/cancel/{id}', name: 'app_checkout_cancel', methods: ['GET'])]
+    public function cancelPayment(Order $order, EntityManagerInterface $entityManager, CheckoutService $checkoutService): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $order->getCustomer()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ('paid' === $order->getPaymentStatus()) {
+            return $this->redirectToRoute('app_order_confirmation', ['id' => $order->getId()]);
+        }
+
+        if ('pending' === $order->getPaymentStatus()) {
+            $checkoutService->markOrderAsPaymentCancelled($order);
+            $entityManager->flush();
+        }
+
+        return $this->render('order/cancel.html.twig', [
+            'order' => $order,
+        ]);
     }
 
     #[Route('/checkout/{id}/confirmation', name: 'app_order_confirmation', methods: ['GET'])]
@@ -192,10 +243,12 @@ final class OrderController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        if ('paid' !== $order->getPaymentStatus()) {
+            return $this->redirectToRoute('app_checkout_success', ['id' => $order->getId()]);
+        }
+
         $deliveryDateText = $checkoutService->getDeliveryDateText($order);
-        $subtotal = (float) $order->getTotalAmount() - (float) ($order->getDeliveryFee() ?? '0');
-        $deliveryOptions = $checkoutService->getDeliveryOptions($subtotal, $order->getCreatedAt());
-        $deliveryOption = $deliveryOptions[$order->getDeliveryMethod() ?? 'basic'] ?? $deliveryOptions['basic'];
+        $deliveryOption = $checkoutService->getDeliveryOptionForOrder($order);
 
         return $this->render('order/confirmation.html.twig', [
             'order' => $order,
@@ -218,7 +271,7 @@ final class OrderController extends AbstractController
             return $this->redirectToRoute('app_orders_index');
         }
 
-        if (!$checkoutService->canCancelOrder($order)) {
+        if ('paid' !== $order->getPaymentStatus() || !$checkoutService->canCancelOrder($order)) {
             $this->addFlash('warning', 'Cette commande ne peut plus être annulée.');
 
             return $this->redirectToRoute('app_orders_index');

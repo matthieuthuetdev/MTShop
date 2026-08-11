@@ -45,6 +45,12 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $deliveryFee = '0.00';
 
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $stripeCheckoutSessionId = null;
+
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $stripePaymentIntentId = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -169,6 +175,30 @@ class Order
     public function setDeliveryFee(string $deliveryFee): static
     {
         $this->deliveryFee = $deliveryFee;
+
+        return $this;
+    }
+
+    public function getStripeCheckoutSessionId(): ?string
+    {
+        return $this->stripeCheckoutSessionId;
+    }
+
+    public function setStripeCheckoutSessionId(?string $stripeCheckoutSessionId): static
+    {
+        $this->stripeCheckoutSessionId = $stripeCheckoutSessionId;
+
+        return $this;
+    }
+
+    public function getStripePaymentIntentId(): ?string
+    {
+        return $this->stripePaymentIntentId;
+    }
+
+    public function setStripePaymentIntentId(?string $stripePaymentIntentId): static
+    {
+        $this->stripePaymentIntentId = $stripePaymentIntentId;
 
         return $this;
     }
