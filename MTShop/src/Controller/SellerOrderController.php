@@ -18,7 +18,7 @@ final class SellerOrderController extends AbstractController
     #[Route('/seller/orders', name: 'app_seller_orders_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository, CheckoutService $checkoutService): Response
     {
-        $orders = $orderRepository->findBy([], ['createdAt' => 'DESC', 'id' => 'DESC']);
+        $orders = $orderRepository->findProcessableOrdersForSeller();
         $orderCards = [];
 
         foreach ($orders as $order) {

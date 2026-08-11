@@ -158,13 +158,6 @@ function initProductPage() {
         }
     });
 
-    const noModalTriggers = productsContainer.querySelectorAll('[data-no-modal="true"]');
-    noModalTriggers.forEach(element => {
-        element.addEventListener('click', event => {
-            event.stopPropagation();
-        });
-    });
-
     if (productModalElement) {
         productModalElement.addEventListener('shown.bs.modal', () => {
             const focusTarget = modalForm.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');

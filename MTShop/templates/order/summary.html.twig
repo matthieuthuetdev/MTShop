@@ -7,7 +7,7 @@
     <div class="container">
         <div class="mb-4">
             <h1 class="display-5 fw-bold mb-2">Récapitulatif de commande</h1>
-            <p class="fs-5 text-secondary mb-0">Vérifiez vos informations et choisissez votre mode de livraison avant de commander et payer.</p>
+            <p class="fs-5 text-secondary mb-0">Vérifiez vos informations et choisissez votre mode de livraison avant de payer.</p>
         </div>
 
         {% for label, messages in app.flashes %}
@@ -46,11 +46,11 @@
                     </div>
 
                     <div class="mb-4">
-                        <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
-                            <h3 class="h5 fw-bold mb-0">Moyen de paiement</h3>
-                            <span class="btn btn-primary btn-sm text-white disabled">Modifier</span>
+                        <div class="rounded-4 border border-2 p-4" style="border-color: rgba(11, 31, 58, 0.16) !important;">
+                            <h3 class="h5 fw-bold mb-2">Paiement sécurisé</h3>
+                            <p class="mb-2">Vous serez redirigé vers Stripe pour saisir votre carte bancaire.</p>
+                            <p class="mb-0 text-secondary">Aucune carte n'est enregistrée sur MTShop. Vous devrez la ressaisir à chaque commande.</p>
                         </div>
-                        <p class="mb-0">Non disponible</p>
                     </div>
 
                     <form method="post" action="{{ path('app_checkout_place') }}" class="d-grid gap-3">
@@ -89,11 +89,10 @@
                         <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
                             <h3 class="h5 fw-bold mb-3">Récapitulatif</h3>
                             <p class="mb-1"><strong>{{ totalItems }}</strong> article(s)</p>
-                            <p class="mb-1">Sous-total : <strong>{{ subtotal|number_format(2, ',', ' ') }} €</strong></p>
-                            <p class="mb-0 text-secondary">Le montant final sera calculé avec l’offre de livraison choisie.</p>
+                            <p class="mb-0">Sous-total : <strong>{{ subtotal|number_format(2, ',', ' ') }} €</strong></p>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-lg fw-semibold" {% if not hasRequiredAddresses %}disabled{% endif %}>Commander et payer</button>
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold" {% if not hasRequiredAddresses %}disabled{% endif %}>Payer avec Stripe</button>
                     </form>
                 </div>
             </div>

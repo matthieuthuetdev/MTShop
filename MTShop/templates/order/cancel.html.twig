@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement annulé | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="rounded-4 border border-2 bg-white p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
+            <h1 class="display-5 fw-bold mb-3">Paiement annulé</h1>
+            <p class="fs-5 text-secondary mb-4">Le paiement de la commande #{{ order.id }} n'a pas été finalisé. Votre panier n'a pas été supprimé.</p>
+
+            <div class="d-flex flex-column flex-md-row gap-3">
+                <a href="{{ path('app_checkout_summary') }}" class="btn btn-primary btn-lg fw-semibold">Réessayer le paiement</a>
+                <a href="{{ path('app_cart_index') }}" class="btn btn-outline-primary btn-lg fw-semibold">Retourner au panier</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

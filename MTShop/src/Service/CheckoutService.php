@@ -9,6 +9,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\User;
+use App\Repository\CartRepository;
 use DateInterval;
 use DateTimeImmutable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -126,13 +127,13 @@ final class CheckoutService
     /**
      * @param array<int, array{cart: Cart, product: mixed, quantity: int, unitPrice: float, promotion: int, discountedUnitPrice: float, lineTotal: float}> $items
      */
-    public function createOrder(User $customer, array $items, float $subtotal, array $deliveryOption): Order
+    public function createPendingOrder(User $customer, array $items, float $subtotal, array $deliveryOption): Order
     {
         $order = new Order();
         $order->setCustomer($customer);
-        $order->setStatus('confirmed');
-        $order->setPaymentStatus('not_available');
-        $order->setPaymentMethod('Non disponible');
+        $order->setStatus('pending');
+        $order->setPaymentStatus('pending');
+        $order->setPaymentMethod('Stripe Checkout');
         $order->setDeliveryMethod($deliveryOption['code']);
         $order->setDeliveryFee(number_format((float) $deliveryOption['fee'], 2, '.', ''));
         $order->setShippingAddress((string) ($customer->getShippingAddress() ?? ''));
@@ -141,7 +142,6 @@ final class CheckoutService
 
         foreach ($items as $item) {
             $product = $item['product'];
-            $product->setOrderCount((int) $product->getOrderCount() + (int) $item['quantity']);
             $orderItem = new OrderItem();
             $orderItem->setProduct($product);
             $orderItem->setQuantity((int) $item['quantity']);
@@ -151,6 +151,54 @@ final class CheckoutService
         }
 
         return $order;
+    }
+
+    public function markOrderAsPaid(Order $order, CartRepository $cartRepository): void
+    {
+        if ('paid' === $order->getPaymentStatus()) {
+            return;
+        }
+
+        $order->setPaymentStatus('paid');
+        $order->setStatus('confirmed');
+        $order->setPaymentMethod('Stripe Checkout');
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $product = $orderItem->getProduct();
+            if (!$product instanceof Product) {
+                continue;
+            }
+
+            $product->setOrderCount((int) $product->getOrderCount() + (int) $orderItem->getQuantity());
+            $product->setStock(max(0, (int) $product->getStock() - (int) $orderItem->getQuantity()));
+
+            $cart = $cartRepository->findOneBy([
+                'customer' => $order->getCustomer(),
+                'product' => $product,
+            ]);
+
+            if (!$cart instanceof Cart) {
+                continue;
+            }
+
+            $remainingQuantity = (int) $cart->getQuantity() - (int) $orderItem->getQuantity();
+            if ($remainingQuantity > 0) {
+                $cart->setQuantity($remainingQuantity);
+                continue;
+            }
+
+            $cart->setQuantity(0);
+        }
+    }
+
+    public function markOrderAsPaymentCancelled(Order $order): void
+    {
+        if ('paid' === $order->getPaymentStatus()) {
+            return;
+        }
+
+        $order->setPaymentStatus('cancelled');
+        $order->setStatus('cancelled');
     }
 
     public function sendOrderNotification(Order $order, array $summary, array $deliveryOption): void
@@ -167,6 +215,29 @@ final class CheckoutService
                 'customer' => $customer,
                 'items' => $summary['items'],
                 'subtotal' => $summary['subtotal'],
+                'deliveryOption' => $deliveryOption,
+                'grandTotal' => (float) $order->getTotalAmount(),
+            ]);
+
+        $this->mailer->send($email);
+    }
+
+    public function sendPaidOrderNotification(Order $order): void
+    {
+        $recipient = $this->extractRecipientAddress($this->mailerFrom);
+        $customer = $order->getCustomer();
+        $subtotal = $this->getOrderSubtotal($order);
+        $deliveryOption = $this->getDeliveryOptionForOrder($order, $subtotal);
+        $email = (new TemplatedEmail())
+            ->from($this->mailerFrom)
+            ->to($recipient)
+            ->subject('Nouvelle commande MTShop')
+            ->htmlTemplate('mail/order_notification.html.twig')
+            ->context([
+                'order' => $order,
+                'customer' => $customer,
+                'items' => $this->buildNotificationItemsFromOrder($order),
+                'subtotal' => $subtotal,
                 'deliveryOption' => $deliveryOption,
                 'grandTotal' => (float) $order->getTotalAmount(),
             ]);
@@ -304,6 +375,41 @@ final class CheckoutService
             ]);
 
         $this->mailer->send($email);
+    }
+
+    public function getOrderSubtotal(Order $order): float
+    {
+        return (float) $order->getTotalAmount() - (float) ($order->getDeliveryFee() ?? '0');
+    }
+
+    /**
+     * @return array{code: string, label: string, description: string, note: string, fee: float, available: bool, estimate: string}
+     */
+    public function getDeliveryOptionForOrder(Order $order, ?float $subtotal = null): array
+    {
+        $subtotal ??= $this->getOrderSubtotal($order);
+        $deliveryOptions = $this->getDeliveryOptions($subtotal, $order->getCreatedAt());
+
+        return $deliveryOptions[$order->getDeliveryMethod() ?? 'basic'] ?? $deliveryOptions['basic'];
+    }
+
+    /**
+     * @return list<array{product: Product|null, quantity: int, discountedUnitPrice: float, lineTotal: float}>
+     */
+    public function buildNotificationItemsFromOrder(Order $order): array
+    {
+        $items = [];
+
+        foreach ($order->getOrderItems() as $orderItem) {
+            $items[] = [
+                'product' => $orderItem->getProduct(),
+                'quantity' => (int) $orderItem->getQuantity(),
+                'discountedUnitPrice' => (float) $orderItem->getUnitPrice(),
+                'lineTotal' => (float) $orderItem->getTotalPrice(),
+            ];
+        }
+
+        return $items;
     }
 
     private function extractRecipientAddress(string $value): Address
