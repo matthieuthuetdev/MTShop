@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
-use App\Enum\UserRole;
 use App\Entity\User;
+use App\Enum\UserRole;
 use App\Form\SignUpType;
 use App\Repository\UserRepository;
+use App\Service\EmailVerificationManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -22,16 +23,18 @@ final class SignUpController extends AbstractController
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-    ): Response
-    {
+        EmailVerificationManager $emailVerificationManager,
+    ): Response {
         $form = $this->createForm(SignUpType::class);
         $form->handleRequest($request);
+        $error = null;
 
         if ($form->isSubmitted() && $form->isValid()) {
             $email = mb_strtolower((string) $form->get('email')->getData());
 
             if ($userRepository->findOneBy(['email' => $email]) !== null) {
                 $form->get('email')->addError(new FormError('Cette adresse mail est déjà utilisée.'));
+                $error = 'Impossible de créer votre compte. Vérifiez les champs du formulaire.';
             } else {
                 $user = new User();
                 $user->setFirstName((string) $form->get('firstName')->getData());
@@ -44,20 +47,28 @@ final class SignUpController extends AbstractController
                         (string) $form->get('password')->getData()
                     )
                 );
+                $user->setEmailVerifiedAt(null);
                 $user->setShippingAddress('');
                 $user->setBillingAddress('');
 
                 $entityManager->persist($user);
+                $verificationCode = $emailVerificationManager->startChallenge($user);
                 $entityManager->flush();
+                $emailVerificationManager->sendCode($user, $verificationCode);
 
-                $this->addFlash('success', 'Votre compte a bien été créé. Vous pouvez maintenant vous connecter.');
+                $request->getSession()->set('email_verification.pending_user_id', $user->getId());
 
-                return $this->redirectToRoute('app_sign_up');
+                $this->addFlash('success', 'Votre compte a bien été créé. Un code de vérification a été envoyé à votre adresse mail.');
+
+                return $this->redirectToRoute('app_email_verification');
             }
+        } elseif ($form->isSubmitted()) {
+            $error = 'Impossible de créer votre compte. Vérifiez les champs du formulaire.';
         }
 
         return $this->render('sign_up/index.html.twig', [
             'registrationForm' => $form->createView(),
+            'error' => $error,
         ]);
     }
 }

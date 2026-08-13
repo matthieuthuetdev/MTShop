@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord admin | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="mb-4">
+        <h1 class="display-5 fw-bold mb-2">Tableau de bord admin</h1>
+        <p class="fs-5 text-secondary mb-0">Accès rapide aux tableaux de bord utilisateurs et produits.</p>
+    </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} mb-4" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-3">
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                <p class="text-secondary mb-1">Utilisateurs</p>
+                <h2 class="display-6 fw-bold mb-3">{{ totalUsers }}</h2>
+                <a href="{{ path('app_admin_users') }}" class="btn btn-primary fw-semibold">Gérer les utilisateurs</a>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                <p class="text-secondary mb-1">Produits</p>
+                <h2 class="display-6 fw-bold mb-3">{{ totalProducts }}</h2>
+                <a href="{{ path('app_seller_dashboard') }}" class="btn btn-primary fw-semibold">Tableau de bord produits</a>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                <p class="text-secondary mb-1">Admins</p>
+                <h2 class="display-6 fw-bold mb-3">{{ totalAdmins }}</h2>
+                <span class="badge text-bg-primary px-3 py-2">Rôle ADMIN</span>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <div class="rounded-4 border border-2 bg-white p-4 shadow-sm h-100" style="border-color: #0b1f3a !important;">
+                <p class="text-secondary mb-1">Vendeurs</p>
+                <h2 class="display-6 fw-bold mb-3">{{ totalSellers }}</h2>
+                <a href="{{ path('app_admin_sellers') }}" class="btn btn-outline-primary fw-semibold">Voir les vendeurs</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

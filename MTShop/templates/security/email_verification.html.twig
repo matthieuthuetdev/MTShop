@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérification de l'e-mail | MTShop{% endblock %}
+
+{% block body %}
+<section class="bg-white py-5" style="min-height: calc(100vh - 72px);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-7">
+                <div class="rounded-4 bg-white border border-2 p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
+                    <h1 class="display-5 fw-bold mb-3">Vérification de l'e-mail</h1>
+                    <p class="fs-5 text-secondary mb-4">
+                        Un code à 6 chiffres a été envoyé à <strong>{{ pending_user.email }}</strong>.
+                    </p>
+
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }} mb-4" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    <form method="post" action="{{ path('app_email_verification_verify') }}" class="d-grid gap-3" novalidate>
+                        <input type="hidden" name="_token" value="{{ csrf_token('email_verification_auth') }}">
+
+                        <div>
+                            <label for="email-verification-code" class="form-label fw-semibold">Code de vérification</label>
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="6"
+                                pattern="\d{6}"
+                                class="form-control form-control-lg"
+                                id="email-verification-code"
+                                name="code"
+                                placeholder="Entrez le code reçu par e-mail"
+                                autocomplete="one-time-code"
+                                required
+                                autofocus
+                            >
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-lg fw-semibold">Valider le code</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

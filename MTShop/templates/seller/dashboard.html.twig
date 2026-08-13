@@ -1,16 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tableau de bord vendeur | MTShop{% endblock %}
+{% block title %}Tableau de bord produits | MTShop{% endblock %}
 
 {% block body %}
 <section class="container py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
         <div>
-            <h1 class="display-5 fw-bold mb-2">Mes produits</h1>
-            <p class="fs-5 text-secondary mb-0">Gérez vos produits et vos stocks depuis votre tableau de bord vendeur.</p>
+            <h1 class="display-5 fw-bold mb-2">Tableau de bord produits</h1>
+            <p class="fs-5 text-secondary mb-0">Gérez les produits, les stocks et les actions de modification.</p>
         </div>
-        <button type="button" class="btn btn-primary btn-lg fw-semibold" data-bs-toggle="modal" data-bs-target="#productNewModal" data-action="new">Ajouter un produit</button>
+
+        <button type="button" class="btn btn-primary btn-lg fw-semibold" data-bs-toggle="modal" data-bs-target="#productNewModal" data-action="new">
+            Ajouter un produit
+        </button>
     </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} mb-4" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
 
     <div class="row g-4">
         <div class="col-12">
@@ -27,6 +38,7 @@
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {% for product in products %}
                                 <tr>
@@ -41,29 +53,47 @@
                                                     </div>
                                                 {% endif %}
                                             </div>
+
                                             <div>
                                                 <div class="fw-semibold">{{ product.name }}</div>
-                                                <div class="text-secondary">{{ product.description|slice(0, 70) ~ (product.description|length > 70 ? '…' : '') }}</div>
+                                                <div class="text-secondary">
+                                                    {{ product.description|slice(0, 70) ~ (product.description|length > 70 ? '…' : '') }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
+
                                     <td>{{ (product.price / 100)|number_format(2, ',', ' ') }} €</td>
                                     <td>{{ product.stock }}</td>
                                     <td>{{ product.category ?: '—' }}</td>
                                     <td>{{ product.isActive ? 'Actif' : 'Inactif' }}</td>
+
                                     <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#productEditModal-{{ product.id }}">Modifier</button>
-                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="{{ product.id }}" data-delete-token="{{ csrf_token('delete_product_' ~ product.id) }}" data-product-name="{{ product.name }}">Supprimer</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#productEditModal-{{ product.id }}">
+                                            Modifier
+                                        </button>
+
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="{{ product.id }}" data-delete-token="{{ csrf_token('delete_product_' ~ product.id) }}" data-product-name="{{ product.name }}">
+                                            Supprimer
+                                        </button>
                                     </td>
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="6" class="text-center text-secondary">Aucun produit trouvé.</td>
+                                    <td colspan="6" class="text-center text-secondary">
+                                        Aucun produit trouvé.
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+
+                {% include '_partials/pagination.html.twig' with {
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    routeName: 'app_seller_dashboard'
+                } %}
             </div>
         </div>
     </div>
@@ -73,16 +103,32 @@
             <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
                 <div class="modal-header border-0">
                     <h5 class="modal-title" id="productNewModalLabel">Ajouter un produit</h5>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="rounded-4 bg-white p-4">
-                        {{ form_start(newProductForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
-                            {% include 'seller/_product_form.html.twig' %}
-                            <div class="mt-4 d-flex justify-content-end gap-3">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                                <button type="submit" class="btn btn-primary">Créer le produit</button>
-                            </div>
+                        {{ form_start(newProductForm, {
+                            'attr': {
+                                'enctype': 'multipart/form-data'
+                            }
+                        }) }}
+
+                        {% include 'seller/_product_form.html.twig' with {
+                            productForm: newProductForm
+                        } %}
+
+                        <div class="mt-4 d-flex justify-content-end gap-3">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                Annuler
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+                                Créer le produit
+                            </button>
+                        </div>
+
                         {{ form_end(newProductForm) }}
                     </div>
                 </div>
@@ -95,16 +141,29 @@
             <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
+
                 <div class="modal-body">
-                    <p class="mb-0">Voulez-vous vraiment supprimer le produit <strong id="deleteProductName"></strong> ? Cette action est irréversible.</p>
+                    <p class="mb-0">
+                        Voulez-vous vraiment supprimer le produit
+                        <strong id="deleteProductName"></strong>
+                        ? Cette action est irréversible.
+                    </p>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
                     <form id="deleteProductForm" method="post" action="">
                         <input type="hidden" name="_token" id="deleteProductToken" value="">
-                        <button type="submit" class="btn btn-danger">Supprimer</button>
+
+                        <button type="submit" class="btn btn-danger">
+                            Supprimer
+                        </button>
                     </form>
                 </div>
             </div>
@@ -116,17 +175,35 @@
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content rounded-4 border border-2 shadow-sm" style="border-color: #0b1f3a !important;">
                     <div class="modal-header border-0">
-                        <h5 class="modal-title" id="productEditModalLabel-{{ product.id }}">Modifier le produit</h5>
+                        <h5 class="modal-title" id="productEditModalLabel-{{ product.id }}">
+                            Modifier le produit
+                        </h5>
+
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
+
                     <div class="modal-body">
                         <div class="rounded-4 bg-white p-4">
-                            {{ form_start(editProductForms[product.id], {'attr': {'enctype': 'multipart/form-data'}}) }}
-                                {% include 'seller/_product_form.html.twig' %}
-                                <div class="mt-4 d-flex justify-content-end gap-3">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                                </div>
+                            {{ form_start(editProductForms[product.id], {
+                                'attr': {
+                                    'enctype': 'multipart/form-data'
+                                }
+                            }) }}
+
+                            {% include 'seller/_product_form.html.twig' with {
+                                productForm: editProductForms[product.id]
+                            } %}
+
+                            <div class="mt-4 d-flex justify-content-end gap-3">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    Annuler
+                                </button>
+
+                                <button type="submit" class="btn btn-primary">
+                                    Enregistrer
+                                </button>
+                            </div>
+
                             {{ form_end(editProductForms[product.id]) }}
                         </div>
                     </div>

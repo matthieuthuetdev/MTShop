@@ -62,6 +62,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $passwordResetTokenExpiresAt = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $validationCodeHash = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $validationCodeExpiresAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $emailVerifiedAt = null;
+
     #[ORM\Column(type: Types::TEXT)]
     private ?string $shippingAddress = null;
 
@@ -265,6 +274,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->passwordResetTokenExpiresAt = $passwordResetTokenExpiresAt;
 
         return $this;
+    }
+
+    public function getValidationCodeHash(): ?string
+    {
+        return $this->validationCodeHash;
+    }
+
+    public function setValidationCodeHash(?string $validationCodeHash): static
+    {
+        $this->validationCodeHash = $validationCodeHash;
+
+        return $this;
+    }
+
+    public function getValidationCodeExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->validationCodeExpiresAt;
+    }
+
+    public function setValidationCodeExpiresAt(?\DateTimeImmutable $validationCodeExpiresAt): static
+    {
+        $this->validationCodeExpiresAt = $validationCodeExpiresAt;
+
+        return $this;
+    }
+
+    public function getEmailVerifiedAt(): ?\DateTimeImmutable
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function setEmailVerifiedAt(?\DateTimeImmutable $emailVerifiedAt): static
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
+
+        return $this;
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return null !== $this->emailVerifiedAt;
     }
 
     public function getUserIdentifier(): string

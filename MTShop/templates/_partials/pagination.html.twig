@@ -1,0 +1,44 @@
+{% if totalPages > 1 %}
+    <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center flex-wrap gap-2 mb-0">
+            {% if currentPage > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(routeName, app.request.query.all|merge({page: currentPage - 1})) }}">Page précédente</a>
+                </li>
+            {% endif %}
+
+            {% set startPage = max(1, currentPage - 2) %}
+            {% set endPage = min(totalPages, currentPage + 2) %}
+
+            {% if startPage > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(routeName, app.request.query.all|merge({page: 1})) }}">1</a>
+                </li>
+                {% if startPage > 2 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endif %}
+
+            {% for page in startPage..endPage %}
+                <li class="page-item {% if page == currentPage %}active{% endif %}">
+                    <a class="page-link {% if page == currentPage %}bg-primary text-white border-primary{% endif %}" href="{{ path(routeName, app.request.query.all|merge({page: page})) }}">{{ page }}</a>
+                </li>
+            {% endfor %}
+
+            {% if endPage < totalPages %}
+                {% if endPage < totalPages - 1 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(routeName, app.request.query.all|merge({page: totalPages})) }}">{{ totalPages }}</a>
+                </li>
+            {% endif %}
+
+            {% if currentPage < totalPages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(routeName, app.request.query.all|merge({page: currentPage + 1})) }}">Page suivante</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
