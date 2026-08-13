@@ -10,6 +10,14 @@
                 <div class="rounded-4 bg-white border border-2 p-4 p-md-5 shadow-sm" style="border-color: #0b1f3a !important;">
                     <h1 class="display-5 fw-bold mb-4">Se connecter</h1>
 
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }} mb-4" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
                     {% if error %}
                         <div class="alert alert-danger mb-4" role="alert">
                             {{ error }}

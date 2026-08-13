@@ -15,7 +15,13 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_sellers' %}active{% endif %}" href="{{ path('app_admin_sellers') }}" data-turbo="false">Gérer les vendeurs</a>
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}" href="{{ path('app_admin_dashboard') }}" data-turbo="false">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_admin_users' %}active{% endif %}" href="{{ path('app_admin_users') }}" data-turbo="false">Utilisateurs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_seller_dashboard' %}active{% endif %}" href="{{ path('app_seller_dashboard') }}" data-turbo="false">Tableau de bord produits</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if app.request.attributes.get('_route') == 'app_my_account' %}active{% endif %}" href="{{ path('app_my_account') }}" data-turbo="false">Mon compte</a>

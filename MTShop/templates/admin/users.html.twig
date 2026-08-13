@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs | MTShop{% endblock %}
+
+{% block body %}
+<section class="container py-5">
+    <div class="mb-4">
+        <h1 class="display-5 fw-bold mb-2">Tableau de bord utilisateurs</h1>
+        <p class="fs-5 text-secondary mb-0">Gérez les rôles de chaque compte et consultez l’état de validation e-mail.</p>
+    </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} mb-4" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="rounded-4 border border-2 bg-white p-4 shadow-sm" style="border-color: #0b1f3a !important;">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Adresse mail</th>
+                        <th>Rôle</th>
+                        <th>Validation e-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ user.firstName }} {{ user.lastName }}</div>
+                                <div class="text-secondary small">ID {{ user.id }}</div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <form method="post" action="{{ path('app_admin_user_update_role', {id: user.id}) }}" class="d-flex gap-2 align-items-center">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_user_role_' ~ user.id) }}">
+                                    <input type="hidden" name="page" value="{{ currentPage }}">
+                                    <select name="role" class="form-select form-select-sm">
+                                        {% for option in roleOptions %}
+                                            <option value="{{ option.value }}" {% if option.value == user.role.value %}selected{% endif %}>
+                                                {{ option.label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm text-white">Modifier</button>
+                                </form>
+                            </td>
+                            <td>
+                                {% if user.emailVerified %}
+                                    <span class="badge text-bg-success px-3 py-2">Adresse validée</span>
+                                {% else %}
+                                    <span class="badge text-bg-warning px-3 py-2">Adresse à vérifier</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-secondary py-4">Aucun utilisateur trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% include '_partials/pagination.html.twig' with {
+            currentPage: currentPage,
+            totalPages: totalPages,
+            routeName: 'app_admin_users'
+        } %}
+    </div>
+</section>
+{% endblock %}

@@ -4,13 +4,13 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Security\LoginFormAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 final class SignInController extends AbstractController
 {
@@ -19,7 +19,8 @@ final class SignInController extends AbstractController
         Request $request,
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
-        TokenStorageInterface $tokenStorage,
+        UserAuthenticatorInterface $userAuthenticator,
+        LoginFormAuthenticator $loginFormAuthenticator,
     ): Response {
         if (null !== $this->getUser()) {
             return $this->redirectToRoute('app_home_page');
@@ -43,11 +44,12 @@ final class SignInController extends AbstractController
 
                     if (!$user instanceof User || !$passwordHasher->isPasswordValid($user, $password)) {
                         $error = 'Adresse mail ou mot de passe incorrect.';
+                    } elseif (!$user->isEmailVerified()) {
+                        $error = 'Vous devez vérifier votre adresse e-mail avant de vous connecter.';
                     } else {
-                        $tokenStorage->setToken(new PostAuthenticationToken($user, 'main', $user->getRoles()));
                         $this->addFlash('success', 'Connexion réussie. Heureux de vous revoir sur MTShop.');
 
-                        return $this->redirectToRoute('app_home_page');
+                        return $userAuthenticator->authenticateUser($user, $loginFormAuthenticator, $request);
                     }
                 }
             }
