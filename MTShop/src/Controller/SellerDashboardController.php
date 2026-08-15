@@ -42,7 +42,9 @@ final class SellerDashboardController extends AbstractController
             $limit
         );
 
-        // Formulaire de création
+        /*
+         * Formulaire de création
+         */
         $newProduct = new Product();
 
         $newProductForm = $formFactory->createNamed(
@@ -55,7 +57,9 @@ final class SellerDashboardController extends AbstractController
             ]
         );
 
-        // Formulaires de modification
+        /*
+         * Formulaires de modification
+         */
         $editProductForms = [];
 
         foreach ($products as $product) {
@@ -85,18 +89,30 @@ final class SellerDashboardController extends AbstractController
     #[Route('/seller/product/new', name: 'app_seller_product_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FormFactoryInterface $formFactory
     ): Response {
         $product = new Product();
 
-        $form = $this->createForm(
+        /*
+         * IMPORTANT :
+         * Le formulaire doit avoir exactement le même nom
+         * que celui créé dans le dashboard.
+         */
+        $form = $formFactory->createNamed(
+            'product_new',
             ProductType::class,
-            $product
+            $product,
+            [
+                'action' => $this->generateUrl('app_seller_product_new'),
+                'method' => 'POST',
+            ]
         );
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             /** @var UploadedFile|null $imageFile */
             $imageFile = $form->get('imageFile')->getData();
 
@@ -113,6 +129,7 @@ final class SellerDashboardController extends AbstractController
                     );
 
                     $product->setImageName($newFilename);
+
                 } catch (FileException $exception) {
                     $this->addFlash(
                         'danger',
@@ -121,6 +138,9 @@ final class SellerDashboardController extends AbstractController
                 }
             }
 
+            /*
+             * Génération du slug
+             */
             $product->setSlug(
                 strtolower(
                     trim(
@@ -146,6 +166,10 @@ final class SellerDashboardController extends AbstractController
             );
         }
 
+        /*
+         * Si le formulaire est invalide,
+         * on affiche le formulaire avec ses erreurs.
+         */
         return $this->render('seller/new.html.twig', [
             'productForm' => $form->createView(),
         ]);
@@ -155,9 +179,15 @@ final class SellerDashboardController extends AbstractController
     public function edit(
         Product $product,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FormFactoryInterface $formFactory
     ): Response {
-        $form = $this->createForm(
+        /*
+         * IMPORTANT :
+         * Même nom que celui utilisé dans le dashboard.
+         */
+        $form = $formFactory->createNamed(
+            'product_edit_' . $product->getId(),
             ProductType::class,
             $product,
             [
@@ -172,6 +202,7 @@ final class SellerDashboardController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             /** @var UploadedFile|null $imageFile */
             $imageFile = $form->get('imageFile')->getData();
 
@@ -188,6 +219,7 @@ final class SellerDashboardController extends AbstractController
                     );
 
                     $product->setImageName($newFilename);
+
                 } catch (FileException $exception) {
                     $this->addFlash(
                         'danger',
@@ -196,6 +228,9 @@ final class SellerDashboardController extends AbstractController
                 }
             }
 
+            /*
+             * Regénération du slug
+             */
             $product->setSlug(
                 strtolower(
                     trim(
