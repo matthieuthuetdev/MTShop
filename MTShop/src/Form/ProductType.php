@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Image;
 
 final class ProductType extends AbstractType
@@ -23,41 +24,73 @@ final class ProductType extends AbstractType
                 'label' => 'Nom du produit',
                 'required' => true,
             ])
+
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => true,
-                'attr' => ['rows' => 5],
+                'attr' => [
+                    'rows' => 5,
+                ],
             ])
+
             ->add('price', MoneyType::class, [
                 'label' => 'Prix (€)',
                 'currency' => 'EUR',
                 'required' => true,
+
+                // Utilise un véritable input HTML5 de type number.
+                'html5' => true,
+
+                // Deux chiffres maximum après la virgule.
+                'scale' => 2,
+
+                'attr' => [
+                    'min' => '0',
+                    'step' => '0.01',
+                    'inputmode' => 'decimal',
+                ],
+
+                // Vérification côté serveur.
+                'constraints' => [
+                    new GreaterThanOrEqual(0),
+                ],
             ])
+
             ->add('stock', IntegerType::class, [
                 'label' => 'Stock',
                 'required' => true,
             ])
+
             ->add('promotion', IntegerType::class, [
                 'label' => 'Promotion (%)',
                 'required' => false,
             ])
+
             ->add('category', TextType::class, [
                 'label' => 'Catégorie',
                 'required' => false,
             ])
+
             ->add('imageFile', FileType::class, [
                 'label' => 'Image du produit',
                 'required' => false,
                 'mapped' => false,
-                'attr' => ['accept' => 'image/*'],
+                'attr' => [
+                    'accept' => 'image/*',
+                ],
                 'constraints' => [
                     new Image([
                         'maxSize' => '5M',
-                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
                         'mimeTypesMessage' => 'Veuillez télécharger un fichier PNG, JPEG ou WebP.',
                     ]),
                 ],
             ])
+
             ->add('isActive', CheckboxType::class, [
                 'label' => 'Produit actif',
                 'required' => false,
