@@ -63,7 +63,7 @@
                                         </div>
                                     </td>
 
-                                    <td>{{ (product.price / 100)|number_format(2, ',', ' ') }} €</td>
+                                    <td>{{ product.price  }} €</td>
                                     <td>{{ product.stock }}</td>
                                     <td>{{ product.category ?: '—' }}</td>
                                     <td>{{ product.isActive ? 'Actif' : 'Inactif' }}</td>
