@@ -70,8 +70,8 @@
                                                 id="cart-decrease-{{ item.product.id }}"
                                                 class="btn btn-danger js-cart-decrease"
                                                 data-product-id="{{ item.product.id }}"
-                                                data-url="{{ path('app_cart_decrease', {id: item.cart.id}) }}"
-                                                data-csrf-token="{{ csrf_token('cart_decrease_' ~ item.cart.id) }}"
+                                                data-url="{% if isGuestCart %}{{ path('app_cart_decrease_by_product', {id: item.product.id}) }}{% else %}{{ path('app_cart_decrease', {id: item.cart.id}) }}{% endif %}"
+                                                data-csrf-token="{% if isGuestCart %}{{ csrf_token('cart_add_' ~ item.product.id) }}{% else %}{{ csrf_token('cart_decrease_' ~ item.cart.id) }}{% endif %}"
                                             >
                                                 Retirer
                                             </button>
@@ -83,8 +83,8 @@
                                                 id="cart-increase-{{ item.product.id }}"
                                                 class="btn btn-primary js-cart-increase"
                                                 data-product-id="{{ item.product.id }}"
-                                                data-url="{{ path('app_cart_increase', {id: item.cart.id}) }}"
-                                                data-csrf-token="{{ csrf_token('cart_increase_' ~ item.cart.id) }}"
+                                                data-url="{% if isGuestCart %}{{ path('app_cart_add', {id: item.product.id}) }}{% else %}{{ path('app_cart_increase', {id: item.cart.id}) }}{% endif %}"
+                                                data-csrf-token="{% if isGuestCart %}{{ csrf_token('cart_add_' ~ item.product.id) }}{% else %}{{ csrf_token('cart_increase_' ~ item.cart.id) }}{% endif %}"
                                             >
                                                 Ajouter
                                             </button>
@@ -95,8 +95,8 @@
                                             id="cart-remove-{{ item.product.id }}"
                                             class="btn btn-outline-danger js-cart-remove"
                                             data-product-id="{{ item.product.id }}"
-                                            data-url="{{ path('app_cart_remove', {id: item.cart.id}) }}"
-                                            data-csrf-token="{{ csrf_token('cart_remove_' ~ item.cart.id) }}"
+                                            data-url="{% if isGuestCart %}{{ path('app_cart_remove_by_product', {id: item.product.id}) }}{% else %}{{ path('app_cart_remove', {id: item.cart.id}) }}{% endif %}"
+                                            data-csrf-token="{% if isGuestCart %}{{ csrf_token('cart_add_' ~ item.product.id) }}{% else %}{{ csrf_token('cart_remove_' ~ item.cart.id) }}{% endif %}"
                                         >
                                             Supprimer l'article
                                         </button>
@@ -126,10 +126,36 @@
                     </div>
 
                     <div class="col-12 col-lg-4 text-lg-end">
-                        <a href="{{ path('app_checkout_summary') }}" class="btn btn-primary btn-lg fw-semibold px-4">Passer la commande</a>
+                        {% if isGuestCart %}
+                            <button type="button" class="btn btn-primary btn-lg fw-semibold px-4" data-bs-toggle="modal" data-bs-target="#guestCheckoutModal">
+                                Passer la commande
+                            </button>
+                        {% else %}
+                            <a href="{{ path('app_checkout_summary') }}" class="btn btn-primary btn-lg fw-semibold px-4">Passer la commande</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+
+            {% if isGuestCart %}
+                <div class="modal fade" id="guestCheckoutModal" tabindex="-1" aria-labelledby="guestCheckoutModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border border-2" style="border-color: #0b1f3a !important;">
+                            <div class="modal-header">
+                                <h2 class="modal-title h4" id="guestCheckoutModalLabel">Connexion nécessaire</h2>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">Pour passer votre commande, connectez-vous ou créez un compte. Votre panier sera conservé et transféré vers votre compte.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="{{ path('app_login') }}" class="btn btn-primary">Se connecter</a>
+                                <a href="{{ path('app_sign_up') }}" class="btn btn-outline-primary">S'inscrire</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 </section>

@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Service\TwoFactorAuthenticationManager;
+use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         private readonly TwoFactorAuthenticationManager $twoFactorAuthenticationManager,
         private readonly EntityManagerInterface $entityManager,
         private readonly TokenStorageInterface $tokenStorage,
+        private readonly CartService $cartService,
     ) {
     }
 
@@ -59,10 +61,16 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $token->getUser();
 
         if ($user instanceof UserInterface && $user instanceof User) {
+            $this->cartService->mergeGuestCart($user, $session);
+
             $bypassUserId = $session->get('two_factor.bypass_user_id');
             if ($user->getId() === $bypassUserId) {
                 $session->remove('two_factor.bypass_user_id');
                 $session->remove('two_factor.target_path');
+
+                if ($this->cartService->getTotals($user, $session)['totalItems'] > 0) {
+                    return new RedirectResponse($this->urlGenerator->generate('app_checkout_summary'));
+                }
 
                 $targetPath = $this->getTargetPath($session, $firewallName);
 
@@ -86,6 +94,10 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
                 return new RedirectResponse($this->urlGenerator->generate('app_two_factor'));
             }
+        }
+
+        if ($user instanceof User && $this->cartService->getTotals($user, $request->getSession())['totalItems'] > 0) {
+            return new RedirectResponse($this->urlGenerator->generate('app_checkout_summary'));
         }
 
         $targetPath = $this->getTargetPath($request->getSession(), $firewallName);
